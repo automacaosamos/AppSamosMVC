@@ -14,5 +14,5 @@ services/__recovery/*
 services/__history/*
 *.res
 *.exe
-*.ib
+*.log
 www/

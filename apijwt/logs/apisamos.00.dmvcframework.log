@@ -877,3 +877,5 @@
 2021-01-04 15:43:05:758  [TID       5964][INFO    ] EXIT: LoadSystemControllers [dmvcframework]
 2021-01-04 15:43:06:879  [TID       6888][INFO    ] POST:/api/utilslogin [0:0:0:0:0:0:0:1] -> UtilsController.TUtilsController.GetLogin - 200 OK [dmvcframework]
 2021-01-04 15:43:11:810  [TID       8056][INFO    ] GET:/api/empresasbuscar [0:0:0:0:0:0:0:1] -> EmpresasController.TEmpresasController.GetAll - 200 OK [dmvcframework]
+2021-01-04 17:31:48:666  [TID       3512][INFO    ] Default Logger initialized [dmvcframework]
+2021-01-04 17:31:48:686  [TID       3512][INFO    ] Server started on port 8050 [dmvcframework]

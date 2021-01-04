@@ -10,5 +10,5 @@ report/__history/*
 report/__recovery/*
 *.res
 *.exe
-*.ib
+*.log
 www/
