@@ -1,0 +1,34 @@
+.login-panel .x-panel-body-el {
+    background-color: #eeeeee;
+}
+
+.login-box .x-panel-body-el {
+    background-color: #f6f6f6;
+    border: 'solid 1px';
+    border-color: var(--base-color);
+}
+
+.outer-div{
+    width:100%;
+    text-align: center;
+    &:after{
+        content: " ";
+        width:100%;
+        height: 1px;
+        background-color: #cacaca;
+        position:absolute;
+        left: 0;
+        top: 9px;
+    }
+}
+
+.seperator{
+    text-align: center;
+    color: #3a3a3a;
+    font-family: "Open Sans";
+    display: inline-block;
+    background: white;
+    position: relative;
+    z-index: 1;
+    padding: 0 8px;
+}

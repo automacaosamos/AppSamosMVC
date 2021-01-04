@@ -1,0 +1,158 @@
+unit Controller.Customer;
+
+interface
+
+uses
+  MVCFramework, MVCFramework.Commons, MVCFramework.Serializer.Commons,
+
+  Redis.Values;
+  //, MVCFramework.Middleware.Authentication.RoleBasedAuthHandler
+
+type
+  [MVCPath('/api')]
+  TControllerCustomer = class(TMVCController) 
+  public
+    [MVCPath]
+    [MVCHTTPMethod([httpGET])]
+    procedure Index;
+
+    [MVCPath('/reversedstrings/($Value)')]
+    [MVCHTTPMethod([httpGET])]
+    procedure GetReversedString(const Value: String);
+  protected
+    procedure OnBeforeAction(Context: TWebContext; const AActionName: string; var Handled: Boolean); override;
+    procedure OnAfterAction(Context: TWebContext; const AActionName: string); override;
+
+  public
+    //Sample CRUD Actions for a "Customer" entity
+    [MVCPath('/customers')]
+    [MVCHTTPMethod([httpGET])]
+    procedure GetCustomers;
+
+    [MVCPath('/customers/($id)')]
+    [MVCHTTPMethod([httpGET])]
+    procedure GetCustomer(id: Integer);
+
+    [MVCPath('/customers')]
+    [MVCHTTPMethod([httpPOST])]
+    //[MVCRequiresRole('incluir')]
+    procedure CreateCustomer;
+
+    [MVCPath('/customers/($id)')]
+    [MVCHTTPMethod([httpPUT])]
+    //[MVCRequiresRole('alterar')]
+    procedure UpdateCustomer(id: Integer);
+
+    [MVCPath('/customers/($id)')]
+    [MVCHTTPMethod([httpDELETE])]
+    //[MVCRequiresRole('excluir')]
+    procedure DeleteCustomer(id: Integer);
+
+  end;
+
+implementation
+
+uses
+  System.SysUtils, MVCFramework.Logger, System.StrUtils, Provider.Redis,
+  Service.AccessLevel;
+
+procedure TControllerCustomer.Index;
+begin
+  //use Context property to access to the HTTP request and response 
+  Render('Hello DelphiMVCFramework World');
+end;
+
+procedure TControllerCustomer.GetReversedString(const Value: String);
+begin
+  Render(System.StrUtils.ReverseString(Value.Trim));
+end;
+
+procedure TControllerCustomer.OnAfterAction(Context: TWebContext; const AActionName: string);
+begin
+  { Executed after each action }
+  inherited;
+end;
+
+procedure TControllerCustomer.OnBeforeAction(Context: TWebContext; const AActionName: string;
+  var Handled: Boolean);
+var
+  LGUID: String;
+  LJSON: String;
+begin
+  { Executed before each action
+    if handled is true (or an exception is raised) the actual
+    action will not be called }
+  Handled := False;
+
+  LGUID := Context.LoggedUser.Roles[0];
+
+  if not GetRedisClient.GET(LGUID, LJSON) then
+  begin
+    Render(401, 'Authorization Forbidden');
+    Exit;
+  end;
+
+  Handled := not IsAuthorized(Self.ClassName, LJSON, Context.Request.HTTPMethod);
+
+  if Handled then
+    Render(401, 'Authorization Forbidden');
+
+
+//  if AActionName = 'CreateCustomer' then
+//  begin
+//    Handled := not Context.LoggedUser.Roles.Contains('incluir');
+//  end;
+//
+//  if AActionName = 'UpdateCustomer' then
+//  begin
+//    Handled := not Context.LoggedUser.Roles.Contains('alterar');
+//  end;
+//
+//  if AActionName = 'DeleteCustomer' then
+//  begin
+//    Handled := not Context.LoggedUser.Roles.Contains('excluir');
+//  end;
+
+  inherited;
+end;
+
+//Sample CRUD Actions for a "Customer" entity
+procedure TControllerCustomer.GetCustomers;
+var
+  LValue: String;
+begin
+  //todo: render a list of customers
+  if GetRedisClient.GET('key', LValue) then
+  begin
+    Writeln('Read ' + LValue);
+    Render(LValue);
+  end;
+end;
+
+procedure TControllerCustomer.GetCustomer(id: Integer);
+begin
+  //todo: render the customer by id
+end;
+
+procedure TControllerCustomer.CreateCustomer;
+
+begin
+  //todo: create a new customer
+
+  GetRedisClient.&SET('key', Context.Request.Body, 30);
+  Writeln('Write ' + Context.Request.Body);
+end;
+
+procedure TControllerCustomer.UpdateCustomer(id: Integer);
+begin
+  //todo: update customer by id
+end;
+
+procedure TControllerCustomer.DeleteCustomer(id: Integer);
+begin
+  //todo: delete customer by id
+end;
+
+
+
+end.

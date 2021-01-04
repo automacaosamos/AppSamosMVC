@@ -1,0 +1,189 @@
+unit ConexoesController;
+
+interface
+
+uses
+  Classes, SysUtils, Data.DB, MVCFramework.Commons,
+  FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf,
+  FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Stan.Async,
+  FireDAC.Phys, FireDAC.Phys.FB, FireDAC.Phys.FBDef,
+  FireDAC.Stan.Param, FireDAC.DatS, FireDAC.DApt.Intf, FireDAC.DApt,
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, FireDAC.Phys.IBBase,
+  System.JSON, REST.Response.Adapter {$IFDEF MSWINDOWS} , vcl.ClipBrd {$ENDIF};
+  type
+  TConexoesController = class
+  protected
+  public
+    function pegaConexao(): TFDConnection;
+    function Abre_Tabelas(TextSQL:String):TFDQuery;
+    function Ultimo_ID(Tabela,Status:String):Integer;
+    function ExecutaScriptSQL(SQLScript:String):Boolean;
+    function IsAuthorized(AController, AJSON: String; AMethod: TMVCHTTPMethodType): Boolean;
+
+    function TotalRegistros(F_SQL:String):Integer;
+  private
+    //
+  published
+    //
+  end;
+
+implementation
+
+uses FuncoesController;
+
+function TConexoesController.pegaConexao(): TFDConnection;
+var
+  ConexaoLocal: TFDConnection;
+begin
+  ConexaoLocal := TFDConnection.Create(nil);
+  try
+    try
+      ConexaoLocal.Params.DriverID   := 'FB';
+      ConexaoLocal.Params.Add('server=' + Configurar('HOSTNAME='));
+      ConexaoLocal.Params.Add('port=' + Configurar('PORTNAME='));
+      ConexaoLocal.Params.Add('CharacterSet=ISO8859_1');
+      ConexaoLocal.Params.Add('Protocol=TCPIP');
+      ConexaoLocal.Params.DataBase   := Configurar('DATANAME=');
+      ConexaoLocal.Params.Pooled     := False;
+      ConexaoLocal.Params.UserName   := Configurar('USERNAME=');
+      ConexaoLocal.Params.Password   := Configurar('PASSWORD=');
+      ConexaoLocal.LoginPrompt       := False;
+      ConexaoLocal.Open();
+    except
+       on e: exception do gera_log(e.message);
+    end;
+  finally
+    Result := ConexaoLocal;
+  end;
+end;
+
+
+function TConexoesController.Abre_Tabelas(TextSQL:String):TFDQuery;
+var
+ Query : TFDQuery;
+begin
+//  Clipboard.AsText := TextSQL;
+  Query             := TFDQuery.Create(nil);
+  Query.Connection  := pegaConexao();
+  try
+    try
+      with Query do
+        begin
+         Close;
+         UnPrepare;
+         Sql.Clear;
+         Sql.Add(TextSQL);
+         Prepare;
+         Open;
+        end;
+    except
+      on e: exception do gera_log(e.message);
+    end;
+  finally
+    result := Query;
+  end;
+
+end;
+
+//-----------------------------------------------------------------
+function TConexoesController.ExecutaScriptSQL(SQLScript:String):Boolean;
+//-----------------------------------------------------------------
+var
+  DQuery  : TFDQuery;
+begin
+
+  DQuery            := TFDQuery.Create(nil);
+
+  try
+    DQuery.Connection := pegaConexao();
+    try
+      with DQuery do
+        begin
+          UnPrepare;
+          Sql.Clear;
+          Sql.Add(SQLScript);
+          Prepare;
+          ExecSql;
+        end;
+    except
+      on e: exception do gera_log(e.message);
+    end;
+  finally
+    result := True;
+    DQuery.Free;
+  end;
+
+end;
+
+function TConexoesController.TotalRegistros(F_SQL:String):Integer;
+var
+  Query : TFDQuery;
+begin
+  try
+    Query             := TFDQuery.Create(nil);
+    Query.Connection  := pegaConexao();
+    try
+      Query.Close;
+      Query.Unprepare;
+      Query.SQL.Text   := F_SQL;
+      Query.Prepare;
+      Query.Open;
+    except
+      on e: exception do gera_log(e.message);
+    end;
+  finally
+    if Query.IsEmpty then
+      result := 0
+    else
+      result := Query.FindField('REGISTROS').AsInteger;
+    FreeAndNil(Query);
+  end;
+
+end;
+
+
+function TConexoesController.Ultimo_ID(Tabela,Status:String):Integer;
+var
+ Query : TFDQuery;
+begin
+  Query             := TFDQuery.Create(nil);
+  Query.Connection  := pegaConexao();
+  try
+    try
+      with Query do
+        begin
+         Close;
+         UnPrepare;
+         Sql.Clear;
+         if Status = 'T' then
+           begin
+           Sql.Text := 'execute block returns (ULTIMO integer) ' +
+                       'as ' +
+                       'declare variable incremento integer; ' +
+                       'begin ' +
+                       '  incremento = gen_id(gen_' + Tabela + '_id, 1); ' +
+                       '  while (exists(select * from ' + Tabela + ' where '+ Tabela + '_ID =  :incremento)) do ' +
+                       '    incremento = incremento + 1; ' +
+                       '  ultimo = incremento; ' +
+                       '  suspend; ' +
+                       'end';
+           end
+         else
+           Sql.Text := 'select max('+ Tabela +'_ID) as ULTIMO from '+ Tabela;
+         Prepare;
+         Open;
+        end;
+    except
+      on e: exception do gera_log(e.message);
+    end;
+  finally
+    if not Query.IsEmpty then
+      result := Query.FindField('ULTIMO').AsInteger
+    else
+      result := 1;
+    Query.Free;
+  end;
+
+end;
+
+end.

@@ -1,1 +1,1 @@
-AppSamosMVD
+AppSamosMVC

@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2020/09/14 17:10:34.000.931,=C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Unit5.pas</Transaction>
+    <Transaction>2020/09/21 11:32:49.000.810,=C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Unit5.pas</Transaction>
+    <Transaction>2020/11/09 07:45:16.000.285,=C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Unit5.pas</Transaction>
+    <Transaction>2020/11/09 07:45:19.000.389,=C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Unit6.pas</Transaction>
+    <Transaction>2020/11/09 07:49:27.000.081,C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Unit6.pas=C:\AppSamosMVC\api\UnitWebMobile.pas</Transaction>
+    <Transaction>2020/11/09 07:49:27.000.081,C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Unit6.dfm=C:\AppSamosMVC\api\UnitWebMobile.dfm</Transaction>
+    <Transaction>2020/11/09 07:51:05.000.942,C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Unit5.pas=C:\AppSamosMVC\api\controller\Controller.Congregacoes.pas</Transaction>
+    <Transaction>2020/11/09 07:51:51.000.683,C:\Users\Administrador\Documents\Embarcadero\Studio\Projects\Project6.dproj=C:\AppSamosMVC\api\apirelatorios.dproj</Transaction>
+    <Transaction>2020/11/09 08:26:03.000.294,=C:\AppSamosMVC\api\Unit1.pas</Transaction>
+    <Transaction>2020/11/09 08:34:24.000.976,C:\AppSamosMVC\api\Unit1.pas=C:\AppSamosMVC\api\model\Model.Congregacoes.pas</Transaction>
+    <Transaction>2020/11/09 11:41:19.000.675,=C:\AppSamosMVC\api\controller\ConexoesController.pas</Transaction>
+    <Transaction>2020/11/09 11:41:25.000.949,=C:\AppSamosMVC\api\controller\FuncoesController.pas</Transaction>
+    <Transaction>2020/11/10 17:33:40.000.764,C:\AppSamosMVC\api\model\CongregacoesVO.pas=C:\AppSamosMVC\api\model\Model.Congregacoes.pas</Transaction>
+    <Transaction>2020/11/10 17:34:32.000.966,C:\AppSamosMVC\api\controller\CongregacoesController.pas=C:\AppSamosMVC\api\controller\Controller.Congregacoes.pas</Transaction>
+    <Transaction>2020/11/11 15:10:38.000.056,C:\AppSamosMVC\servidor\apirelatorios.dproj=C:\AppSamosMVC\servidor\apisamos.dproj</Transaction>
+    <Transaction>2020/11/11 15:11:26.000.972,C:\AppSamosMVC\servidor\controller\CongregacoesController.pas=C:\AppSamosMVC\servidor\controller\EmpresasController.pas</Transaction>
+    <Transaction>2020/11/11 15:40:17.000.560,C:\AppSamosMVC\servidor\model\CongregacoesVO.pas=C:\AppSamosMVC\servidor\model\EmpreasVO.pas</Transaction>
+    <Transaction>2020/11/11 15:40:57.000.939,C:\AppSamosMVC\servidor\model\EmpreasVO.pas=C:\AppSamosMVC\servidor\model\EmpresasVO.pas</Transaction>
+    <Transaction>2020/11/12 18:34:28.000.539,C:\AppSamosMVC\servidor\controller\UsuariosController.pas=C:\AppSamosMVC\servidor\controller\EmpresasController.pas</Transaction>
+    <Transaction>2020/11/12 18:35:33.000.564,=C:\AppSamosMVC\servidor\controller\EmpresasController.pas</Transaction>
+    <Transaction>2020/11/12 18:36:03.000.784,C:\AppSamosMVC\servidor\model\UsuariosVO.pas=C:\AppSamosMVC\servidor\model\EmpresasVO.pas</Transaction>
+    <Transaction>2020/11/12 18:57:27.000.713,=C:\AppSamosMVC\servidor\model\EmpresasVO.pas</Transaction>
+    <Transaction>2020/11/13 08:36:46.000.828,C:\AppSamosMVC\servidor\controller\UsuariosController.pas=C:\AppSamosMVC\servidor\controller\CidadesController.pas</Transaction>
+    <Transaction>2020/11/13 08:38:16.000.359,=C:\AppSamosMVC\servidor\controller\UsuariosController.pas</Transaction>
+    <Transaction>2020/11/13 08:38:57.000.420,C:\AppSamosMVC\servidor\model\UsuariosVO.pas=C:\AppSamosMVC\servidor\model\CidadesVO.pas</Transaction>
+    <Transaction>2020/11/13 08:58:38.000.657,=C:\AppSamosMVC\servidor\model\UsuariosVO.pas</Transaction>
+    <Transaction>2020/11/20 17:01:32.000.929,C:\AppSamosMVC\apisamos\WebModule.pas=C:\AppSamosMVC\apisamos\UnitWebMobile.pas</Transaction>
+    <Transaction>2020/11/20 17:01:32.000.929,C:\AppSamosMVC\apisamos\WebModule.dfm=C:\AppSamosMVC\apisamos\UnitWebMobile.dfm</Transaction>
+    <Transaction>2020/12/05 17:42:19.000.213,=C:\AppSamosMVC\api\model\PortadoresVO.pas</Transaction>
+    <Transaction>2020/12/05 17:44:11.000.348,=C:\AppSamosMVC\api\model\BancosVO.pas</Transaction>
+    <Transaction>2020/12/05 18:02:26.000.564,=C:\AppSamosMVC\api\controller\PortadoresController.pas</Transaction>
+    <Transaction>2020/12/05 18:04:03.000.270,=C:\AppSamosMVC\api\controller\BancosController.pas</Transaction>
+    <Transaction>2020/12/13 16:13:19.000.905,=C:\AppSamosMVC\api\controller\UtilsController.pas</Transaction>
+    <Transaction>2020/12/13 16:14:27.000.896,=C:\AppSamosMVC\api\model\UtilsVO.pas</Transaction>
+    <Transaction>2020/12/23 14:58:10.000.278,=C:\SuperSidney\SynPDF\SynPdf.pas</Transaction>
+    <Transaction>2020/12/23 14:59:57.000.057,C:\SuperSidney\SynPDF\SynPdf.pas=</Transaction>
+  </Transactions>
+</BorlandProject>

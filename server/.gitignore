@@ -1,0 +1,9 @@
+.env
+.vscode/
+node_modules
+public/
+package-lock.*
+*.log
+config.json
+ssl/
+.well-known/

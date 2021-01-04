@@ -1,0 +1,14 @@
+{
+  "leaf": false,
+  "children": [
+    { "text": "Home",       "iconCls": "x-fa fa-home",           "xtype": "homeview",       "leaf": true },
+    { "text": "Empresas",   "iconCls": "x-fa fa-building",       "xtype": "empresaslist",   "leaf": true },
+    { "text": "Usuários",   "iconCls": "x-fa fa-user",           "xtype": "usuarioslist",   "leaf": true },
+    { "text": "Portadores", "iconCls": "fas fa-money-check-alt", "xtype": "portadoreslist", "leaf": true },
+    { "text": "Bancos",     "iconCls": "x-fa fa-university",     "xtype": "bancoslist",     "leaf": true },
+    { "text": "Cidades",    "iconCls": "fas fa-city",            "xtype": "cidadeslist",    "leaf": true },
+    { "text": "Permissões", "iconCls": "x-fa fa-cogs",           "xtype": "permissoeslist", "leaf": true },
+    { "text": "Login",      "iconCls": "x-fa fa-id-card",        "xtype": "login",          "leaf": true },
+    { "text": "Logout",     "iconCls": "x-fa fa-door-open",      "xtype": "logoutview",     "leaf": true }
+  ]
+}

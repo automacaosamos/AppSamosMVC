@@ -1,0 +1,842 @@
+﻿unit FuncoesController;
+
+interface
+
+uses SysUtils,
+     Classes,
+     StrUtils,
+     DateUtils,
+     db,
+     System.JSON,
+     System.Rtti,
+     MVCFramework.Commons,
+     Redis.Commons,
+     Redis.Client,
+     Redis.Netlib.Indy;
+
+function Month(Dt: TDateTime): Integer;
+function Year(Dt: TDateTime): Integer;
+function Day(Dt: TDateTime): Integer;
+function StringToInteger(Const F_STRING:string): integer;
+function IntegerToString(Const F_INTEGER:integer): String;
+function Titulo(Nome: String): String;
+function StrContains(const S1, S2: string): Boolean;
+function StrPos(const S, subStr: string; Index: Integer): Integer;
+function StrAllTrim(const S: string): string;
+function StrLTrim(const S: string): string; //tira espaços da esquerda
+function StrRTrim(const S: string): string;
+function StrLen(const S: string): Integer;
+function StrLeft(const S: string; Count: Integer): string;
+function StrRight(const S: string; Count: Integer): string;
+function ZeroLeft(const X: string;Len : Integer): string;
+function DateSbr(Const DataNormal:TDateTIme;CasasAno:Integer):string;
+function StrUpper(const S: string): string; //transforma em maiuscula
+function Gera_Log(frase:String):Boolean;
+function StrEmpty(const S: string): Boolean;
+function iif(TestExp: Boolean; TrueExp, FalseExp: Variant): Variant;
+function StrReplicate(const S: string; Count: Integer): string;
+function StrSpace(Count: Integer): string;
+function StrLPad(const S: string; Count: Integer): string;
+function StrRPad(const S: string; Count: Integer): string;
+function StrCPad(const S: string; Count: Integer): string;
+function Explode(str, separador: string): TStringList;
+function StrSubst(const S, Del, Ins: string; Count: Integer): string;
+function Valor_Int(Const F_STRING:string): integer;
+function Valor_Str(Const F_INTEGER:integer): String;
+function Valor_FloatStr(Const F_FLOAT:Real): String;
+function Valor_FloatPto(Const F_FLOAT:Real): String;
+function Str_Float(Const VlrString:String): Real;
+function HoursBetween(Tm1, Tm2: TDateTime): Double;
+function DayName(Dt: TDateTime): string;
+function Configurar(Retornar:String):String;
+function MRound(Value: Double; Dec: Integer): Double;  // use Double or
+function Pow(X, Y: Double): Double;
+function RemoverEspeciais(Str:String): String;
+function RemoverSimbolArray(Str:String): String;
+function StrZero(Number: Double; Len, Dec: Integer): string;
+function StrZeroString(const X: string;Len : Integer): string;
+function MinutesBetween(Tm1, Tm2: TDateTime): Double;
+function AddMonths (const DT: TDateTime; const Months: Extended): TDateTime;
+function AddDays (const DT: TDateTime; const Days: Extended): TDateTime;
+function DaysBetween(Dt1, Dt2: TDateTime): Integer;
+function SubstString (Variavel,Substituir:string;Posicao:Integer):string;
+function GeraGUID(): String;
+function GetRedisClient: IRedisClient;
+function DateToJSON(JSONDate: TDateTime): String;
+function IsAuthorized(AController, AJSON: String; AMethod: TMVCHTTPMethodType): Boolean;
+
+implementation
+
+function IsAuthorized(AController, AJSON: String; AMethod: TMVCHTTPMethodType): Boolean;
+var
+  JsonArray    : TJSONArray;
+  JSonValue    : TJSonValue;
+  ArrayElement : TJSonValue;
+  FoundValue   : TJSonValue;
+begin
+  JsonValue := TJSonObject.ParseJSONValue(AJSON);
+  JsonArray := JsonValue as TJSONArray;
+
+ for ArrayElement in JsonArray do
+   begin
+      FoundValue := ArrayElement.FindValue(AController);
+      if FoundValue <> nil then
+       begin
+         Result := ArrayElement.GetValue<string>('CONTROLLER' + '.' + AController);
+         break;
+       end;
+   end;
+
+
+{
+    LDM.JSONToDataSet(AJSON);
+    if LDM.FDMemAccess.Locate('CONTROLLER', AController, []) then
+      begin
+        case AMethod of
+          httpGET    : Result := LDM.FDMemAccess.FieldByName('LISTAR').AsString  = 'S';
+          httpPOST   : Result := LDM.FDMemAccess.FieldByName('INCLUIR').AsString = 'S';
+          httpPUT    : Result := LDM.FDMemAccess.FieldByName('ALTERAR').AsString = 'S';
+          httpDELETE : Result := LDM.FDMemAccess.FieldByName('EXCLUIR').AsString = 'S';
+        end;
+      end;
+}
+end;
+
+
+function GetRedisClient: IRedisClient;
+begin
+  Result := NewRedisClient('127.0.0.1', 6379);
+end;
+
+function GeraGUID(): String;
+var
+  LGUID: TGUID;
+begin
+  CreateGUID(LGUID);
+  Result := GUIDToString(LGUID);
+end;
+function DateToJSON(JSONDate: TDateTime): String;
+var
+  DataJSON:TStringList;
+begin
+  try
+    DataJSON := Explode(DateToStr(JSONDate),'/');
+    result := DataJSON[2] + '-' +DataJSON[1] + '-' +DataJSON[0]
+  finally
+    FreeAndNil(DataJSON);
+  end;
+
+end;
+
+function SubstString (Variavel,Substituir:string;Posicao:Integer):string;
+var
+  Retorno: String;
+begin
+  Retorno := Variavel;
+  Delete(Retorno,Posicao,Length(Substituir));
+  Insert(Substituir,Retorno,Posicao);
+  Result := Retorno;
+end;
+
+// StrZeroString
+function StrZeroString(Const X: String; Len: Integer): string;
+var
+  S: string;
+begin
+  S := StrAllTrim(StrLeft(X,Len));
+  Result := StrReplicate('0', Len - Length(S)) + S;
+end;
+
+// DayName
+function DayName(Dt: TDateTime): string;
+begin
+  Result := FormatSettings.LongDayNames[DayOfWeek(Dt)];
+end;
+
+// StrRight
+function StrRight(const S: string; Count: Integer): string;
+begin
+  Result := Copy(S, Length(S) - Count + 1, Count);
+end;
+// HoursBetween
+function HoursBetween(Tm1, Tm2: TDateTime): Double;
+begin
+  Result := SecondsBetween(Tm1, Tm2) / 3600;
+end;
+
+// DaysBetween
+function DaysBetween(Dt1, Dt2: TDateTime): Integer;
+begin
+  Result := Round(Dt2 - Dt1);
+end;
+
+// MinutesBetween
+function MinutesBetween(Tm1, Tm2: TDateTime): Double;
+begin
+  Result := SecondsBetween(Tm1, Tm2) / 60;
+end;
+
+//*****************************//
+function AddDays (const DT: TDateTime; const Days: Extended): TDateTime;
+//*****************************//
+begin
+  Result := DT + Days;
+End;
+
+//*************************************//
+function Valor_Int(Const F_STRING:string): integer;
+//*************************************//
+var
+  I, Code: Integer;
+begin
+
+  Val(StrAllTrim(F_STRING), I, Code);
+
+  if Code <> 0 then
+    result := 0
+  else
+    result := I;
+end;
+
+//*************************************//
+function Valor_Str(Const F_INTEGER:integer): String;
+//*************************************//
+begin
+  try
+    Result := IntToStr(F_INTEGER);
+  except
+    Result := '0';
+  end;
+end;
+
+//*************************************//
+function Valor_FloatStr(Const F_FLOAT:Real): String;
+//*************************************//
+begin
+  try
+    Result := FloatToStr(F_FLOAT);
+  except
+    Result := '0';
+  end;
+end;
+//*************************************//
+function Valor_FloatPto(Const F_FLOAT:Real): String;
+//*************************************//
+begin
+  try
+    Result := StrSubst(FloatToStr(F_FLOAT),',','.',0);
+  except
+    Result := '0.00';
+  end;
+end;
+// MRound
+function MRound(Value: Double; Dec: Integer): Double;
+var
+  Ord: Double;
+  Sign: SmallInt;
+begin
+  Sign := 1;
+  if Value < 0 then
+    Sign := -1;
+  Ord := Pow(10, Dec);
+  Result := Value - (Frac(Frac(Value) * Ord) / Ord);
+  if Abs(Frac(Frac(Value) * Ord)) >= 0.5 then
+    Result := Result + (Pow(10, -Dec) * Sign);
+end;
+
+// Pow
+function Pow(X, Y: Double): Double;
+begin
+  Result := Exp(Ln(X) * Y);
+end;
+
+//****************************************************//
+function Explode(str, separador: string): TStringList;
+//****************************************************//
+var
+  p: integer;
+begin
+  Result := TStringList.Create;
+  p := Pos(separador, str);
+  while (p > 0) do
+  begin
+    Result.Add(Copy(String(str), 1, p-1));
+    Delete(str, 1, p + Length(separador) - 1);
+    p := Pos(separador, str);
+  end;
+  if (str <> '') then  Result.Add(str);
+end;
+
+// StrSubst
+//------------------------------------------------------------------
+function StrSubst(const S, Del, Ins: string; Count: Integer): string;
+//------------------------------------------------------------------
+var
+  I, Found: Integer;
+  R: string;
+begin
+  R := S;
+  if (S = '') or (Del = '') or (Del = Ins) then
+    R := ''
+  else
+    begin
+      Found := 0;
+      I := 1;
+      while ((Count = 0) or (Found < Count)) and (I <= Length(R)) do
+        begin
+          if Copy(R, I, Length(Del)) = Del then
+            begin
+              Inc(Found);
+              Delete(R, I, Length(Del));
+              Insert(Ins, R, I);
+              Inc(I, Length(Ins));
+            end
+          else
+            Inc(I);
+        end;
+    end;
+  Result := R;
+end;
+// StrReplicate
+//------------------------------------------------------------
+function StrReplicate(const S: string; Count: Integer): string;
+//------------------------------------------------------------
+var
+  I: Integer;
+begin
+  Result := '';
+  for I := 1 to Count do
+    Result := Result + S;
+end;
+// StrSpace
+//---------------------------------------
+function StrSpace(Count: Integer): string;
+//---------------------------------------
+begin
+  Result := StrReplicate(' ', Count);
+end;
+// StrLeft
+function StrLeft(const S: string; Count: Integer): string;
+begin
+  Result := Copy(S, 1, Count);
+end;
+// StrLPad
+//-------------------------------------------------------
+function StrLPad(const S: string; Count: Integer): string;
+//-------------------------------------------------------
+begin
+  Result := S + StrSpace(Count - Length(S));
+end;
+// StrCPad
+//-------------------------------------------------------
+function StrCPad(const S: string; Count: Integer): string;
+//-------------------------------------------------------
+var
+T,U: Integer;
+begin
+  T:= (Count - Length(S)) div 2;
+  U:= Count - T - Length(S);
+  Result := StrSpace(T) + StrAllTrim(S) + StrSpace(U);
+end;
+// StrRPad
+//-------------------------------------------------------
+function StrRPad(const S: string; Count: Integer): string;
+//-------------------------------------------------------
+begin
+  Result := StrSpace(Count - Length(S)) + S;
+end;
+// StrZero
+//----------------------------------------------------------
+function StrZero(Number: Double; Len, Dec: Integer): string;
+//----------------------------------------------------------
+var
+  U : ShortString;
+  S : String;
+begin
+  Str(Number : Len : Dec, U);
+  S := String(U);
+  S := StrAllTrim(S);
+  Result := StrReplicate('0', Len - Length(S)) + S;
+end;
+
+// StrEmpty
+//-----------------------------------------
+function StrEmpty(const S: string): Boolean;
+//-----------------------------------------
+begin
+   Result := (StrAllTrim(S) = '');
+end;
+// StrLTrim
+//-----------------------------------------
+function StrLTrim(const S: string): string;
+//-----------------------------------------
+var
+  I: Integer;
+begin
+  Result := '';
+  if S = '' then
+    Exit;
+  I := 1;
+  while (S[I] = ' ') and (I <= Length(S)) do
+    Inc(I);
+  Result := Copy(S, I, Length(S));
+end;
+// StrRTrim
+//-----------------------------------------
+function StrRTrim(const S: string): string;
+//-----------------------------------------
+var
+  I: Integer;
+begin
+  Result := '';
+  if S = '' then
+    Exit;
+  I := Length(S);
+  while (S[I] = ' ') and (I > 0) do
+    Dec(I);
+  Result := Copy(S, 1, I);
+end;
+// StrAllTrim
+//--------------------------------------------------
+function StrAllTrim(const S: string): string;
+//--------------------------------------------------
+begin
+  Result := StrRTrim(StrLTrim(S));
+end;
+// StrContains
+//--------------------------------------------------
+function StrContains(const S1, S2: string): Boolean;
+//--------------------------------------------------
+begin
+  if StrPos(S1,S2,1) > 0 then
+    result := True
+  else
+    result := False;
+end;
+// StrLen
+//----------------------------------------
+function StrLen(const S: string): Integer;
+//----------------------------------------
+begin
+  Result := Length(StrAllTrim(S));
+end;
+// StrPos
+//----------------------------------------------------------------
+function StrPos(const S, SubStr: string; Index: Integer): Integer;
+//----------------------------------------------------------------
+var
+  Found, I: Integer;
+begin
+  Result := 0;
+  if (Index < 1) or (S = '') or (SubStr = '') then
+    Exit;
+  Found := 0;
+  I := 1;
+  while (I <= Length(S)) and (Found < Index) do
+    begin
+      if Copy(S, I, Length(SubStr)) = SubStr then
+        Inc(Found);
+      Inc(I);
+    end;
+  if Found = Index then
+    Result := I - 1;
+end;
+// StrUpper
+//---------------------------------------
+function StrUpper(const S: string): string;
+//---------------------------------------
+begin
+  Result := AnsiUpperCase(S);
+end;
+
+//---------------------------------------
+function Configurar(Retornar:String):String;
+//---------------------------------------
+var
+  Arquivo : TStringList;
+  Itens   : Integer;
+  Coluna  : TStringList;
+begin
+  Arquivo := TStringList.Create;
+  Result  := '';
+  Arquivo.LoadFromFile('config.ib');
+  try
+    for Itens := 0 to Arquivo.Count -1 do
+      begin
+        if StrContains(Arquivo[Itens],Retornar) then
+          begin
+            try
+              Coluna := Explode(Arquivo[Itens],'=');
+            finally
+              result := Coluna[1];
+              FreeAndNil(Coluna);
+            end;
+          end;
+      end;
+  finally
+    FreeAndNil(Arquivo);
+  end;
+
+end;
+function Titulo(Nome: String): String;
+var
+  N, D: String;
+begin
+  N := ExtractFileName(Nome); { Retira o path }
+  D := ChangeFileExt(N,''); { Retira a extensão }
+  { Coloca a primeira letra em maiúscula e o resto
+    em minúscula }
+  Titulo := LowerCase(Copy(D,1,1)) + LowerCase(Copy(D,2,Length(D)-1));
+end;
+//---------------------------------------
+function gera_log(Frase:String):boolean;
+//---------------------------------------
+var
+  Arquivo: String;
+  Texto  : TextFile;
+begin
+  Arquivo := ExtractFilePath(ParamStr(0)) + Titulo(ParamStr(0)) + '.log';
+  AssignFile(Texto,Arquivo);
+  if not FileExists(Arquivo) then
+    Rewrite(Texto)
+  else
+    Append(Texto);
+  WriteLn(Texto, Frase);
+  CloseFile(Texto);
+  Result := True;
+end;
+
+// iif
+//------------------------------------------------------------------
+function iif(TestExp: Boolean; TrueExp, FalseExp: Variant): Variant;
+//------------------------------------------------------------------
+begin
+  if TestExp then
+    Result := TrueExp
+  else
+    Result := FalseExp;
+end;
+
+//*************************************//
+function RemoverEspacos(Str:String): String;
+//*************************************//
+Begin
+  Str := StrSubst(Str,' ','',0);
+  Result := Str;
+end;
+
+//*************************************//
+function RemoverEspeciais(Str:String): String;
+//*************************************//
+Begin
+
+  Str := StrSubst(Str,'','',0);
+  Str := StrSubst(Str,'.','',0);
+  Str := StrSubst(Str,'/','',0);
+  Str := StrSubst(Str,'-','',0);
+  Str := StrSubst(Str,'(','',0);
+  Str := StrSubst(Str,')','',0);
+  Str := StrSubst(Str,'{','',0);
+  Str := StrSubst(Str,'}','',0);
+  Str := StrSubst(Str,',','',0);
+  Str := StrSubst(Str,'"','',0);
+  Str := StrSubst(Str,'.','',0);
+  Str := StrSubst(Str,'«','',0);
+  Str := StrSubst(Str,':','',0);
+  Str := StrSubst(Str,',','',0);
+  Str := StrSubst(Str,'+','',0);
+  Str := StrSubst(Str,'ª','',0);
+  Str := StrSubst(Str,#10,'',0);
+  Str := StrSubst(Str,#13,'',0);
+  Str := StrSubst(Str,#12,'',0);
+  Result := Str;
+end;
+
+//*************************************//
+function RemoverSimbolArray(Str:String): String;
+//*************************************//
+Begin
+
+  Str := StrSubst(Str,'[','',0);
+  Str := StrSubst(Str,']','',0);
+  Result := Str;
+end;
+
+procedure Deletefiles(APath, AFileSpec: string);
+var
+  lSearchRec:TSearchRec;
+  lFind:integer;
+  lPath:string;
+begin
+  lPath := IncludeTrailingPathDelimiter(APath);
+  lFind := FindFirst(lPath+AFileSpec,faAnyFile,lSearchRec);
+  while lFind = 0 do
+    begin
+      try
+        DeleteFile(lPath+lSearchRec.Name);
+      except
+        //
+      end;
+      lFind := System.SysUtils.FindNext(lSearchRec);
+    end;
+  FindClose(lSearchRec);
+end;
+
+// ZeroLeft
+function ZeroLeft(Const X: String; Len: Integer): string;
+var
+  S: string;
+begin
+  S := StrAllTrim(StrLeft(X,Len));
+  Result := StrReplicate('0', Len - Length(S)) + S;
+end;
+
+
+Function DateSbr(Const DataNormal:TDateTime;CasasAno:Integer):string;
+var
+  DataList:TStringList;
+begin
+  DataList := Explode(DateToStr(DataNormal),'/');
+  try
+    if CasasAno = 4 then
+      result := DataList[0] + DataList[1] + DataList[2]
+    else
+      result := DataList[0] + DataList[1] + Copy(DataList[2],2,2)
+  finally
+    FreeAndNil(DataList);
+  end;
+end;
+
+
+function AddMonths(const DT: TDateTime; const Months: Extended): TDateTime;
+var
+  Day, Month, Year: Word;
+  IMonth          : Integer;
+begin
+  DecodeDate (DT, Year, Month, Day);
+  IMonth := Month + Trunc (Months);
+  if IMonth > 12 then
+    begin
+      Year := Year + (IMonth - 1) div 12;
+      IMonth := IMonth mod 12;
+      if IMonth = 0 then IMonth := 12;
+    end
+  else
+    if IMonth < 1 then
+      begin
+        Year := Year + (IMonth div 12) - 1;
+        IMonth := 12 - abs (IMonth) mod 12;
+      end;
+  Month := IMonth;
+  if Month = 2 then
+    begin
+      if IsLeapYear (Year) and (Day > 29) then
+        Day := 29
+      else
+        if not IsLeapYear (Year) and (Day > 28) then
+          Day := 28;
+    end
+  else
+    if (Month in [9, 4, 6, 11]) and (Day = 31) then
+      Day := 30;
+
+  Result := EncodeDate (Year, Month, Day) + Frac (Months) * 30 +
+
+  Frac (DT);
+
+end;
+
+//*************************************//
+function StringToInteger(Const F_STRING:string): integer;
+//*************************************//
+var
+  I, Code: Integer;
+begin
+
+  Val(F_STRING, I, Code);
+
+  if Code <> 0 then
+    result := 0
+  else
+    result := I;
+end;
+
+//*************************************//
+function IntegerToString(Const F_INTEGER:integer): String;
+//*************************************//
+begin
+  try
+    Result := IntToStr(F_INTEGER);
+  except
+    Result := '0';
+  end;
+end;
+
+
+// Year
+function Year(Dt: TDateTime): Integer;
+var
+  Y, M, D: Word;
+begin
+  DecodeDate(Dt, Y, M, D);
+  Result := Y;
+end;
+
+
+// Month
+function Month(Dt: TDateTime): Integer;
+var
+  Y, M, D: Word;
+begin
+  DecodeDate(Dt, Y, M, D);
+  Result := M;
+end;
+
+
+// Day
+function Day(Dt: TDateTime): Integer;
+var
+  Y, M, D: Word;
+begin
+  DecodeDate(Dt, Y, M, D);
+  Result := D;
+end;
+
+function CalcularDigitoSicoob(Agencia,Cedente,NossoNumero:String): String;
+var
+  Num, Res :String;
+  i, base, digito : Integer;
+const
+  indice = '319731973197319731973';
+begin
+   Result := '0';
+   Num :=  ZeroLeft(Agencia, 4) + ZeroLeft(Cedente, 10) + ZeroLeft(StrAllTrim(NossoNumero), 7);
+   base := 0;
+   for i := 1 to Length(Num) do
+     base := base + ( StrToInt(copy(Num,i,1)) * StrToInt(copy(indice,i,1)) );
+   digito := 11-((  base )-( trunc(base/11) * 11));
+   if (digito > 9) then digito := 0;
+   Res    := IntToStr(digito);
+   Result := Res;
+end;
+
+//*************************************//
+function Calcula_digito_de_control_EAN13(CodS:string):integer;
+//*************************************//
+var
+  i,r,rd: integer;
+  CodN: array[1..12] of integer;
+  b: boolean;
+begin
+  // 1ª fase: calcula suma de digitos x 1 si impar, x 3 si par
+  b := false; r := 0;
+  for i := 1 to 12 do
+    begin
+      CodN[i] := 0;
+      b := Not b;
+      if b then
+        begin
+          CodN[i] := StrToInt(Copy(CodS,i,1)) * 1;
+        end
+      else
+        begin
+          CodN[i] := StrToInt(Copy(CodS,i,1)) * 3;
+        end;
+      r := r + CodN[i];
+    end;
+  rd := 0;
+  // 2ª fase encuentra decena superior
+  for i := r to r + 10 do
+    begin
+      if (i / 10) = Int(i / 10) then rd := i - r;
+    end;
+  if (rd = 10) then rd := 0;
+  result := rd;
+end;
+
+function Str_Float(Const VlrString:String): Real;
+begin
+  try
+    result := StrToFloat(StrSubst(VlrString,'.',',',0));
+  except
+    Result := 0;
+  end;
+end;
+
+function CalculaCnpjCpf(Numero : String) : String;
+var
+  i,j,k, Soma, Digito : Integer;
+  CNPJ : Boolean;
+begin
+  Result := Numero;
+  case Length(Numero) of
+     9: CNPJ := False;
+    12: CNPJ := True;
+  else
+    exit;
+  end;
+  for j := 1 to 2 do
+    begin
+    k := 2;
+    Soma := 0;
+    for i := Length(Result) downto 1 do
+      begin
+        Soma := Soma + (Ord(Result[i])-Ord('0'))*k;
+        Inc(k);
+        if (k > 9) and CNPJ then
+        k := 2;
+      end;
+    Digito := 11 - Soma mod 11;
+    if Digito >= 10 then
+    Digito := 0;
+    Result := Result + Chr(Digito + Ord('0'));
+  end;
+end;
+
+function Formata_Data(const Data,Separador:string;Inversao:Boolean):string;
+begin
+  if Inversao then
+    result := copy(Data,7,4) + Separador + copy(Data,4,2) + Separador + copy(Data,1,2)
+  else
+    result := copy(Data,1,2) + Separador + copy(Data,4,2) + Separador + copy(Data,7,4);
+end;
+
+function Gera_BarCode(const varProduto: string): string;
+  function DigitoEAN13(CodS:string):integer;
+  var
+    i,r,rd: integer;
+    CodN: array[1..12] of integer;
+    b: boolean;
+  begin
+    // 1ª fase: calcula suma de digitos x 1 si impar, x 3 si par
+    b := false; r := 0;
+    for i := 1 to 12 do
+      begin
+        CodN[i] := 0;
+        b := Not b;
+        if b then
+          begin
+            CodN[i] := StrToInt(Copy(CodS,i,1)) * 1;
+          end
+        else
+          begin
+            CodN[i] := StrToInt(Copy(CodS,i,1)) * 3;
+          end;
+        r := r + CodN[i];
+      end;
+    rd := 0;
+    // 2ª fase encuentra decena superior
+    for i := r to r + 10 do
+      begin
+        if (i / 10) = Int(i / 10) then rd := i - r;
+      end;
+    if (rd = 10) then rd := 0;
+    result := rd;
+  end;
+begin
+  result    := '789' + ZeroLeft(varProduto,9) + Valor_Str(DigitoEAN13('789' + ZeroLeft(varProduto,9)));
+end;
+
+
+end.
+
