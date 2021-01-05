@@ -34,7 +34,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
             },
             failure: response => {
                 setTimeout(() => {
-                    const dialog = Ext.Msg.alert('Mensagem', 'Não consegui trazer o ultimo código');
+//                    const dialog = Ext.Msg.alert('Mensagem', 'Não consegui trazer o ultimo código');
+                    const dialog = Utils.Msg.alert('Mensagem', 'Não consegui trazer o ultimo código');
                     Ext.defer(dialog.hide, 2000, dialog);
                     this.getView().setMasked(false);
                 }, 1000);
@@ -86,13 +87,15 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                 resolve(false);
                 return;
             }
-
-            const txtCpfCnpj  = this.lookup('cpfcnpj');
-            const emAlteracao = !this.getViewModel().get('model').phantom;
-            const cpfCnpj     = txtCpfCnpj.getValue();
+           
+            const txtInscricao = this.lookup('inscricao');
+            const txtCpfCnpj   = this.lookup('cpfcnpj');
+            const emAlteracao  = !this.getViewModel().get('model').phantom;
+            const cpfCnpj      = txtCpfCnpj.getValue();
 
             if(!cpfCnpj) {
-                const dialog = Ext.Msg.alert('Mensagem', 'Preencha o CPF/CNPJ');
+                const dialog = Utils.Msg.alert('Mensagem', 'Preencha o CPF/CNPJ');
+//              const dialog = Ext.Msg.alert('Mensagem', 'Preencha o CPF/CNPJ');
                 Ext.defer(dialog.hide, 2000, dialog);
                 resolve(false);
                 return;
@@ -112,7 +115,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                 },
                 failure: response => {
                     setTimeout(() => {
-                        const dialog = Ext.Msg.alert('Mensagem', 'Não consegui checar o CPF/CNPJ');
+                        const dialog = Utils.Msg.alert('Mensagem', 'Não consegui checar o CPF/CNPJ');
+//                        const dialog = Ext.Msg.alert('Mensagem', 'Não consegui checar o CPF/CNPJ');
                         Ext.defer(dialog.hide, 2000, dialog);
                         this.getView().setMasked(false);
                         txtCpfCnpj.focus(true);
@@ -123,12 +127,13 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                     const res = JSON.parse(response.responseText);
                     
                     if(res.status == false) {
-                        const dialog = Ext.Msg.alert('Mensagem', res.message);
+                        const dialog = Utils.Msg.alert('Mensagem', res.message);
+//                        const dialog = Ext.Msg.alert('Mensagem', res.message);
                         Ext.defer(dialog.hide, 2000, dialog);
                         txtCpfCnpj.focus(true);
                         resolve(false);
                     } else {
-                        this.lookup('inscricao').focus(true);
+                        txtInscricao.focus(true);
                         resolve(true);
                     }
 
@@ -160,7 +165,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
             }
 
             if(!inscricao) {
-                const dialog = Ext.Msg.alert('Mensagem', 'Preencha a Inscricao');
+                const dialog = Utils.Msg.alert('Mensagem','Preencha a Inscricao');
+//                const dialog = Ext.Msg.alert('Mensagem', 'Preencha a Inscricao');
                 Ext.defer(dialog.hide, 2000, dialog);
                 resolve(false);
                 return;
@@ -180,7 +186,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                 },
                 failure: response => {
                     setTimeout(() => {
-                        const dialog = Ext.Msg.alert('Mensagem', 'Não consegui checar a inscrição');
+                        const dialog = Utils.Msg.alert('Mensagem','Não consegui checar a inscrição');
+//                        const dialog = Ext.Msg.alert('Mensagem', 'Não consegui checar a inscrição');
                         Ext.defer(dialog.hide, 2000, dialog);
                         this.getView().setMasked(false);
                         txtInscricao.focus(true);
@@ -191,7 +198,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                     const res = JSON.parse(response.responseText);
                     
                     if(res.status == false) {
-                        const dialog = Ext.Msg.alert('Mensagem', res.message);
+                        const dialog = Utils.Msg.alert('Mensagem',res.message);
+//                        const dialog = Ext.Msg.alert('Mensagem', res.message);
                         Ext.defer(dialog.hide, 2000, dialog);
                         txtInscricao.focus(true);
                         resolve(false);
@@ -233,7 +241,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                 },
                 failure: response => {
                     setTimeout(() => {
-                        const dialog = Ext.Msg.alert('Mensagem', 'Não consegui encontrar o CEP');
+                        const dialog = Utils.Msg.alert('Mensagem','Não consegui encontrar o CEP');
+//                        const dialog = Ext.Msg.alert('Mensagem', 'Não consegui encontrar o CEP');
                         Ext.defer(dialog.hide, 2000, dialog);
                         this.getView().setMasked(false);
                         txtCep.focus(true);
@@ -242,9 +251,9 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                 },
                 success: response => {
                     const res = JSON.parse(response.responseText);
-                    
                     if(res.status == false) {
-                        const dialog = Ext.Msg.alert('Mensagem', res.message);
+                        const dialog = Utils.Msg.alert('Mensagem',res.message);
+//                        const dialog = Ext.Msg.alert('Mensagem', res.message);
                         Ext.defer(dialog.hide, 2000, dialog);
                         txtCep.focus(true);
                         resolve(false);
@@ -257,12 +266,10 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                             'CIDADES_IBGE'       : res["IBGE"],
                             'EMPRESAS_ID_CIDADES': res["CODIGO"]
                         });
-
-                        this.lookup('endereco').focus(true);
                         resolve(true);
                     }
-
                     this.getView().setMasked(false);
+                    this.lookup('endereco').focus(true);
                 }
             });
         });
@@ -311,7 +318,6 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                     success: (record, operation) => {
                         this.getViewModel().set('readOnly', true);
                         model.set('EMPRESAS_ID', record.get('EMPRESAS_ID'));
-
                         const dialog = Utils.Msg.alert('Mensagem', 'Gravado com sucesso', () => {
                             this.lookup('alterar').focus();
                         });
@@ -324,7 +330,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                         storeEmpresas.add(record);
                     },
                     failure: (record, operation) => {
-                        const dialog = Ext.Msg.alert('Mensagem', operation.error.response.responseJson.msg);
+                        const dialog = Utils.Msg.alert('Mensagem', operation.error.response.responseJson.msg);
+//                        const dialog = Ext.Msg.alert('Mensagem', operation.error.response.responseJson.msg);
                         Ext.defer(dialog.hide, 2000, dialog);
                     },
                     callback: (record, operation, success) => {
@@ -370,8 +377,8 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
 
     onExcluirClick: function(btn, e) {
         const model = this.getViewModel().get('model');
-
-        Ext.Msg.confirm('Confirmação', 'Quer realmente excluir ?', btn => {
+        Utils.Msg.confirm('Quer realmente excluir ?', btn => {
+//        Ext.Msg.confirm('Confirmação', 'Quer realmente excluir ?', btn => {
             if(btn == 'yes') {
 
                 this.getView().setMasked({
@@ -391,14 +398,16 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
                         const storeEmpresas = this.getView().up('empresaslist').getViewModel().getStore('empresas');
                        
                         this.getView().destroy();
-                        const dialog = Ext.Msg.alert('Mensagem', 'Congregação excluída com sucesso');
+                        const dialog = Utils.Msg.alert('Mensagem', 'Empresa excluída com sucesso');
+//                        const dialog = Ext.Msg.alert('Mensagem', 'Congregação excluída com sucesso');
                         Ext.defer(dialog.hide, 2000, dialog);
                         storeEmpresas.currentPage = 1;
                         storeEmpresas.load();
                     },
                     failure: (record, operation) => {
                         this.getView().setMasked(false);
-                        const dialog = Ext.Msg.alert('Mensagem', 'Erro ao excluir');
+                        const dialog = Utils.Msg.alert('Mensagem', 'Erro ao excluir');
+//                        const dialog = Ext.Msg.alert('Mensagem', 'Erro ao excluir');
                         Ext.defer(dialog.hide, 2000, dialog);
                     }
                 });

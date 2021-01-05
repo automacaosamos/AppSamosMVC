@@ -51,8 +51,8 @@
     <Transaction>2020/12/28 16:04:47.000.769,=C:\AppSamosMVC\apijwt\model\BancosVO.pas</Transaction>
     <Transaction>2020/12/28 16:04:47.000.894,=C:\AppSamosMVC\apijwt\model\UtilsVO.pas</Transaction>
     <Transaction>2020/12/28 16:04:47.000.863,=C:\AppSamosMVC\apijwt\model\UsuariosVO.pas</Transaction>
-    <Transaction>2020/12/28 16:04:47.000.847,=C:\AppSamosMVC\apijwt\model\PortadoresVO.pas</Transaction>
     <Transaction>2020/12/28 16:04:47.000.816,=C:\AppSamosMVC\apijwt\model\EmpresasVO.pas</Transaction>
+    <Transaction>2020/12/28 16:04:47.000.847,=C:\AppSamosMVC\apijwt\model\PortadoresVO.pas</Transaction>
     <Transaction>2020/12/28 16:04:47.000.800,=C:\AppSamosMVC\apijwt\model\CidadesVO.pas</Transaction>
   </Transactions>
 	<ProjectSortOrder AutoSort="0" SortType="0">

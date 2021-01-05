@@ -51,7 +51,7 @@ Ext.define('AppSamos.view.empresas.list.ViewController', {
                 'Authorization': 'Bearer ' + localStorage.getItem('token')
             },
             params: {
-                parametros: 'ULTIMAEMPRESA|0|0',
+                parametros: 'ULTIMAEMPRESAS|0|0',
                 start     : 0,
                 limit     : 1
             },

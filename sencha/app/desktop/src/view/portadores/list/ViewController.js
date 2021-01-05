@@ -47,6 +47,9 @@ Ext.define('AppSamos.view.portadores.list.ViewController', {
             method: 'GET',
             url: localStorage.getItem('api')  + '/portadoresbuscar',
             disableCaching: false,
+            headers: {
+                Authorization: 'Bearer ' + localStorage.getItem('token')
+            },
             params: {
                 parametros: 'ULTIMAPORTADORES|0|0',
                 start     : 0,

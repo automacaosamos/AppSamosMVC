@@ -207,8 +207,8 @@ begin
         PortadoresBasicaVO.PORTADORES_NOME           := '';
         PortadoresBasicaVO.PORTADORES_STATUS         := 'T';
         PortadoresBasicaVO.PORTADORES_CADASTRO       := Date;
-        PortadoresBasicaVO.PORTADORES_ID_CIDADES     := 0;
-        PortadoresBasicaVO.PORTADORES_ID_BANCOS      := 0;
+        PortadoresBasicaVO.PORTADORES_ID_CIDADES     := 1;
+        PortadoresBasicaVO.PORTADORES_ID_BANCOS      := 1;
         PortadoresBasicaVO.PORTADORES_AGENCIA        := '';
         PortadoresBasicaVO.PORTADORES_CONTA          := '';
         PortadoresBasicaVO.PORTADORES_CONVENIO       := '';

@@ -337,9 +337,6 @@ Ext.define('AppSamos.view.empresas.form.View', {
         {
             xtype: 'panel',
             layout: 'hbox',
-            defaults: {
-                triggers: null
-            },
             items: [
                 {
                     xtype: 'textfield',
@@ -360,23 +357,37 @@ Ext.define('AppSamos.view.empresas.form.View', {
                     }
                 },
                 {
-                    xtype: 'textfield',
-                    flex: 1.6,
+                    xtype: 'spinnerfield',
+                    flex: 0.8,
+                    textAlign: 'right',      
+                    margin: '0 5 5 0',                                  
                     label: 'Atrazo',
+                    labelTextAlign: 'center',                    
+                    allowDecimals: true,
+                    decimals: 0,
+                    stepValue: 1,
+                    minValue: 0,
                     bind: {
-                        value: '{model.PESSOAS_ATRAZOCLIENTE}',
-                        readOnly: true
+                        value: '{model.EMPRESAS_ATRAZOCLIENTE}',
+                        readOnly: '{readOnly}'
                     }
-                },
-/*                {
-                    xtype: 'textfield',
-                    flex: 1,
+                },  
+                {
+                    xtype: 'spinnerfield',
+                    flex: 0.8,
+                    textAlign: 'right',      
+                    margin: '0 5 5 0',                                  
                     label: 'Aliquota',
+                    labelTextAlign: 'center',                    
+                    allowDecimals: true,
+                    decimals: 3,
+                    stepValue: 0.001,
+                    minValue: 0.000,
                     bind: {
-                        value: '{model.PESSOAS_ALIQUOTA}',
-                        readOnly: true
+                        value: '{model.EMPRESAS_ALIQUOTA}',
+                        readOnly: '{readOnly}'
                     }
-                }, */
+                },  
                 {
                     xtype: 'togglefield',
                     labelTextAlign: 'center',

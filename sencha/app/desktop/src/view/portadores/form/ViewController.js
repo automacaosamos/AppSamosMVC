@@ -181,9 +181,9 @@ Ext.define('AppSamos.view.portadores.form.ViewController', {
                         this.getViewModel().get('model').set({
                             'PORTADORES_ENDERECO'  : res["ENDERECO"],
                             'PORTADORES_BAIRRO'    : res["BAIRRO"],
-                            'CIDADES_NOME'       : res["CIDADE"],
-                            'CIDADES_ESTADO'     : res["ESTADO"],
-                            'CIDADES_IBGE'       : res["IBGE"],
+                            'CIDADES_NOME'         : res["CIDADE"],
+                            'CIDADES_ESTADO'       : res["ESTADO"],
+                            'CIDADES_IBGE'         : res["IBGE"],
                             'PORTADORES_ID_CIDADES': res["CODIGO"]
                         });
 
@@ -350,8 +350,8 @@ Ext.define('AppSamos.view.portadores.form.ViewController', {
         })
         .then(registro => {
             this.getViewModel().get('model').set({
-                'BANCOS_ID_EMPRESAS': registro.get('BANCOS_ID'),
-                'BANCOS_NOME'       : registro.get('BANCOS_NOME')
+                'PORTADORES_ID_BANCOS': registro.get('BANCOS_ID'),
+                'BANCOS_NOME'         : registro.get('BANCOS_NOME')
             });
         });
     }
