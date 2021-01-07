@@ -11,7 +11,9 @@ uses
   System.JSON,
   MVCFramework.RESTClient,
   ACBrBase,
-  ACBrValidador;
+  ACBrValidador,
+  SynPdf,
+  SynGdiPlus;
 type
   TUtilsVO = class
   private
@@ -295,11 +297,28 @@ begin
 end;
 
 class function TUtilsVO.GetGeraPDF(Parametros:String): TJSONObject;
+var
+  ConexoesControl : TConexoesController;
+  DataSetGenerico : TDataSet;
+  ArquivoPDF      : String;
+  CaminhoPDF      : String;
 begin
-  Result           := TJSONObject.Create;
 
-  Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(False)));
-  Result.AddPair(TJSONPair.Create('message',TJSONString.Create('PDF gerado com sucesso')));
+  ArquivoPDF      := RemoverEspeciais(GeraGuid);
+  CaminhoPDF      := Configurar('PATHPDF=');
+
+  ConexoesControl := TConexoesController.Create;
+
+  DataSetGenerico := ConexoesControl.Abre_Tabelas('select * from USUARIOS ' +
+                                                  'join CIDADES on CIDADES_ID = USUARIOS_ID_CIDADES ' +
+                                                  'where USUARIOS_ID < 100 order by USUARIOS_ID');
+
+
+
+  Result           := TJSONObject.Create;
+  Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(true)));
+  Result.AddPair(TJSONPair.Create('arquivo',TJSONString.Create(ArquivoPDF + '.PDF')));
+
 end;
 
 
