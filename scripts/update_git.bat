@@ -6,7 +6,7 @@ echo ----------------------------
 echo --- Salvando Alteracoes ----
 echo ----------------------------
 echo -
-cd /AppSamosMVC/
+cd /AppSamosMVC
 git add .
 git commit -m "%msg%"
 
@@ -15,7 +15,7 @@ echo ----------------------------
 echo --- Subindo Alteracoes ----
 echo ----------------------------
 echo -
-git push origin master
+git push origin main
 
 
 echo -
