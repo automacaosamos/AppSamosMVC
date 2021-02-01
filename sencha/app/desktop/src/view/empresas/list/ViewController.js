@@ -78,6 +78,73 @@ Ext.define('AppSamos.view.empresas.list.ViewController', {
         });
     },
 
+    onImprimirClick: function(btn, e){
+        Utils.Msg.confirm('Quer realmente imprimir ?', btn => {
+            if(btn == 'yes') {
+                this.getView().setMasked({
+                    xtype: 'loadmask',
+                    message: 'Imprimindo...'
+                });
+                
+                Ext.Ajax.request({
+                    method: 'GET',
+                    url: localStorage.getItem('api')  + '/utilsgerapdf/USUARIOS',
+                    disableCaching: false,
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    failure: response => {
+                        setTimeout(() => {
+                            const dialog = Ext.Msg.alert('Mensagem', 'Não consegui imprimir');
+                            Ext.defer(dialog.hide, 2000, dialog);
+                            form.setMasked(false);
+                        }, 1000);
+                    },
+                    success: response => {
+                        const docDefinition  = JSON.parse(response.responseText);
+
+                        docDefinition['footer'] = function(page, pages) { 
+							return { 
+								stack: [ 
+									'_'.repeat(95),
+									{ text: 'samosweb.com.br Página: ' + page.toString() + '/' + pages.toString(), italics: true, fontSize: 8, alignment: 'right'}
+								],
+								margin: [40, 10]
+							};
+						};
+
+                        const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+                        
+                        pdfDocGenerator.getDataUrl((dataUrl) => {
+                            const win = Ext.create({
+                                xtype: 'window',
+                                title: 'Relatórios',
+                                closable: true,
+                                width: innerWidth - 200,
+                                height: innerHeight - 100,
+                                margins: 0,
+                                padding: 0,
+                                layout: 'fit',
+                                items: {
+                                    xtype: 'panel',
+                                    html: `<iframe 
+                                        src="${dataUrl}" 
+                                        width="${innerWidth - 200}" 
+                                        height="${innerHeight - 100}"
+                                    ></iframe>`
+                                }
+                            });
+                            win.show();
+                        });
+        
+                        this.getView().setMasked(false);
+                    }
+                });
+            }
+        });
+    },
+
+
     onSairClick: function(btn, e){
         this.getViewModel().getStore('empresas').removeAll();
         this.redirectTo('homeview');

@@ -18,7 +18,8 @@ Ext.define('AppSamos.util.Msg', {
             buttons: (options.buttons || []).reduce((obj, btn) => {
                 obj[btn.itemId] = {
                     text: btn.text,
-                    cls: 'primary-button',
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-check',                     
                     handler: () => {
                         dialog.destroy();
                         if(options.fn) {
@@ -50,7 +51,8 @@ Ext.define('AppSamos.util.Msg', {
                 yes: {
                     text: 'Sim',
                     margin: '0 5 0 0',
-                    cls: 'primary-button',
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-check',                     
                     handler: () => {
                         dialog.destroy();
                         if(fn){
@@ -61,7 +63,8 @@ Ext.define('AppSamos.util.Msg', {
                 no: {
                     text: 'Não',
                     margin: '0 5 0 0',
-                    cls: 'danger-button',
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-reply-all',                    
                     handler: () => {
                         dialog.destroy();
                         if(fn) {
@@ -105,7 +108,8 @@ Ext.define('AppSamos.util.Msg', {
             buttons: {
                 ok: {
                     text: 'OK',
-                    cls: 'primary-button',
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-check',                    
                     handler: () => {
                         if(options.fn){
                             options.fn('ok', dialog.down('textfield').getValue());
@@ -115,7 +119,8 @@ Ext.define('AppSamos.util.Msg', {
                 },
                 cancelar: {
                     text: 'Cancelar',
-                    cls: 'danger-button',
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-reply-all',                    
                     handler: () => {
                         if(options.fn){
                             options.fn('cancelar', dialog.down('textfield').getValue());
@@ -153,9 +158,10 @@ Ext.define('AppSamos.util.Msg', {
             html   : message || title,
             buttons: {
                 ok: {
-                    text: 'OK',
-                    cls: 'primary-button',
-                    handler: () => {
+                    text    : 'OK',
+                    cls     : 'secondary-button',
+                    iconCls : 'x-fa fa-check',                    
+                    handler : () => {
                         dialog.destroy();
                         if(fn) {
                             fn();
@@ -166,7 +172,6 @@ Ext.define('AppSamos.util.Msg', {
         });
        
         dialog.show();
-
         return dialog;
     }
 });

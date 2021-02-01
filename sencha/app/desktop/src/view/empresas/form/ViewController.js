@@ -143,77 +143,6 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
         });
     },
 
-    onValidaInscricao: function(txt, event) {
-        return new Ext.Promise((resolve, reject) => {
-            if(
-                this.getViewModel().get('readOnly') ||
-                event && (event.keyCode != 9 && event.keyCode != 13)
-            ) { 
-                resolve(false);
-                return;
-            }
-
-            const txtInscricao  = this.lookup('inscricao');
-            const inscricao     = txtInscricao.getValue();
-            const estado        = this.getViewModel().get('model.CIDADES_ESTADO');
-
-            if(!estado) {
-                const dialog = Ext.Msg.alert('Mensagem', 'Preencha o Estado');
-                Ext.defer(dialog.hide, 2000, dialog);
-                resolve(false);
-                return;
-            }
-
-            if(!inscricao) {
-                const dialog = Utils.Msg.alert('Mensagem','Preencha a Inscricao');
-//                const dialog = Ext.Msg.alert('Mensagem', 'Preencha a Inscricao');
-                Ext.defer(dialog.hide, 2000, dialog);
-                resolve(false);
-                return;
-            }
-
-            this.getView().setMasked({
-                xtype: 'loadmask',
-                message: 'Aguarde...'
-            });
-            
-            Ext.Ajax.request({
-                method: 'GET',
-                url: localStorage.getItem('api')  + `/utilsvalidar/INSCRICAO|${inscricao}|${estado}`,
-                disableCaching: false,
-                headers: {
-                    Authorization: 'Bearer ' + localStorage.getItem('token')
-                },
-                failure: response => {
-                    setTimeout(() => {
-                        const dialog = Utils.Msg.alert('Mensagem','Não consegui checar a inscrição');
-//                        const dialog = Ext.Msg.alert('Mensagem', 'Não consegui checar a inscrição');
-                        Ext.defer(dialog.hide, 2000, dialog);
-                        this.getView().setMasked(false);
-                        txtInscricao.focus(true);
-                        resolve(false);
-                    }, 1000);
-                },
-                success: response => {
-                    const res = JSON.parse(response.responseText);
-                    
-                    if(res.status == false) {
-                        const dialog = Utils.Msg.alert('Mensagem',res.message);
-//                        const dialog = Ext.Msg.alert('Mensagem', res.message);
-                        Ext.defer(dialog.hide, 2000, dialog);
-                        txtInscricao.focus(true);
-                        resolve(false);
-                    } else {
-                        this.lookup('municipal').focus(true);
-                        resolve(true);
-                    }
-
-                    this.getView().setMasked(false);
-                }
-            });
-        });
-    },
-
     onSearchCeps: function(txt, event) {
         return new Ext.Promise((resolve, reject) => {
             if(
@@ -283,9 +212,6 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
 
         const cpfCnpjValido = await this.onValidaCpfCnpj();
         if(cpfCnpjValido == false) { return; }
-
-        const inscricaoValida = await this.onValidaInscricao();
-        if(inscricaoValida == false) { return; }
 
         Utils.Msg.confirm('Quer realmente gravar ?', btn => {
             if(btn == 'yes') {

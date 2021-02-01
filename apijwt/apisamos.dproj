@@ -123,7 +123,6 @@
         <DCCReference Include="controllers\BancosController.pas"/>
         <DCCReference Include="controllers\CidadesController.pas"/>
         <DCCReference Include="controllers\ConexoesController.pas"/>
-        <DCCReference Include="controllers\Controller.Customer.pas"/>
         <DCCReference Include="controllers\EmpresasController.pas"/>
         <DCCReference Include="controllers\FuncoesController.pas"/>
         <DCCReference Include="controllers\PortadoresController.pas"/>

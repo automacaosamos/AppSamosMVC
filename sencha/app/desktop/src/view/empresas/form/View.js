@@ -63,21 +63,23 @@ Ext.define('AppSamos.view.empresas.form.View', {
             items: [
                 {
                     xtype: 'button',
-                    width: 90,
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-file',                           
+                    width: 100,
                     reference : 'incluir',
                     text: 'Incluir',
                     handler: 'onIncluirClick',
-                    cls: 'primary-button',
                     bind: {
                         disabled: '{emEdicao}'
                     }
                 },
                 {
                     xtype: 'button',
-                    width: 90,
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-wrench',                           
+                    width: 100,
                     text: 'Alterar',
                     reference : 'alterar',
-                    cls: 'secondary-button',
                     handler: 'onEditarClick',
                     bind: {
                         disabled: '{emEdicao}'
@@ -85,10 +87,11 @@ Ext.define('AppSamos.view.empresas.form.View', {
                 },
                 {
                     xtype: 'button',
-                    width: 90,
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-trash',                           
+                    width: 100,
                     text: 'Excluir',
                     reference : 'excluir',
-                    cls: 'danger-button',
                     handler: 'onExcluirClick',
                     bind: {
                         disabled: '{emEdicao}'
@@ -100,10 +103,11 @@ Ext.define('AppSamos.view.empresas.form.View', {
                 },
                 {
                     xtype: 'button',
-                    width: 95,
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-reply-all',                           
+                    width: 110,
                     text: 'Cancela',
                     reference : 'cancela',
-                    cls: 'secondary-button',
                     handler: 'onCancelaClick',
                     bind: {
                         disabled: '{readOnly}'
@@ -111,10 +115,11 @@ Ext.define('AppSamos.view.empresas.form.View', {
                 },
                 {
                     xtype: 'button',
-                    width: 90,
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-save',                           
+                    width: 110,
                     text: 'Gravar',
                     reference : 'gravar',
-                    cls: 'primary-button',
                     handler: 'onGravarClick',
                     bind: {
                         disabled: '{readOnly}'

@@ -17,7 +17,6 @@ uses
   BancosController in 'controllers\BancosController.pas',
   CidadesController in 'controllers\CidadesController.pas',
   ConexoesController in 'controllers\ConexoesController.pas',
-  Controller.Customer in 'controllers\Controller.Customer.pas',
   EmpresasController in 'controllers\EmpresasController.pas',
   FuncoesController in 'controllers\FuncoesController.pas',
   PortadoresController in 'controllers\PortadoresController.pas',

@@ -66,6 +66,12 @@
   },
 
   "js": [
+    {
+      "path": "${app.dir}/libraries/pdfmake.min.js"
+    },
+    {
+      "path": "${app.dir}/libraries/vfs_fonts.min.js"
+    }
   ],
 
   "classic": {"js": []},

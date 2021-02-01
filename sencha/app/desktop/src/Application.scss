@@ -82,3 +82,17 @@ $enable-font-awesome: dynamic(true);
     background: red;
     color: white;
 }
+
+.x-dialogheader {
+    background-color: var(--base-dark-color) !important;
+
+    .x-dialogtitle {
+        color: white !important;
+    }
+}
+
+.x-dialog-body-el {
+    font-weight: bold;
+    font-size: 18px;
+    color: black;
+}

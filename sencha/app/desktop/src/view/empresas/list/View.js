@@ -35,8 +35,8 @@ Ext.define('AppSamos.view.empresas.list.View', {
                 {
                     xtype: 'button',
                     text: 'Incluir',
-                    iconCls: 'x-fa fa-file-o',                    
-                    cls: 'primary-button',
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-file',                    
                     width: 100,
                     handler: 'onIncluirClick'
                 },
@@ -46,9 +46,18 @@ Ext.define('AppSamos.view.empresas.list.View', {
                 },
                 {
                     xtype: 'button',
-                    text: 'Sair',
-                    iconCls: 'x-fa fa-door-open',                    
+                    text: 'Imprimir',
                     cls: 'secondary-button',
+                    iconCls: 'x-fa fa-print',                    
+                    handler: 'onImprimirClick',
+                    width: 110,
+                    margin : '0 5 0 0'
+                },
+                {
+                    xtype: 'button',
+                    text: 'Sair',
+                    cls: 'secondary-button',
+                    iconCls: 'x-fa fa-door-open',                    
                     handler: 'onSairClick',
                     width: 100
                 }
@@ -124,12 +133,12 @@ Ext.define('AppSamos.view.empresas.list.View', {
                         },
                         {
                             xtype: 'button',
+                            cls: 'secondary-button',
+                            iconCls: 'x-fa fa-search',                    
                             width: 100,
                             height: 30,
                             text: 'Buscar',
-                            iconCls: 'x-fa fa-search',                    
                             margin: '12 0 12 0',
-                            cls: 'primary-button',
                             handler: 'onBuscarClick'
                         }
                     ]

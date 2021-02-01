@@ -5,15 +5,13 @@ interface
 uses
   DB,
   System.SysUtils,
+  System.StrUtils,
   System.Generics.Collections,
   System.Classes,
   System.Rtti,
   System.JSON,
-  MVCFramework.RESTClient,
-  ACBrBase,
-  ACBrValidador,
-  SynPdf,
-  SynGdiPlus;
+  MVCFramework.RESTClient;
+
 type
   TUtilsVO = class
   private
@@ -70,35 +68,43 @@ begin
                                                             'where PERMISSOES_ID_USUARIOS = ' + Valor_Str(DataSetLogin.FindField('LOGIN_ID').AsInteger) + ' ' +
                                                             'order by PERMISSOES_ID_EMPRESAS');
           try
-            DataSetPermissoes.First;
-            while not DataSetPermissoes.eof do
+            if DataSetPermissoes.IsEmpty then
               begin
-                JsonObject := TJSONObject.Create;
-                JsonObject.AddPair(TJSONPair.Create('PERMISSOES_ID_EMPRESAS',TJSONNumber.Create(DataSetPermissoes.FindField('PERMISSOES_ID_EMPRESAS').AsInteger)));
-                JsonObject.AddPair(TJSONPair.Create('EMPRESAS_FANTASIA'     ,TJSONString.Create(DataSetPermissoes.FindField('EMPRESAS_FANTASIA').AsString)));
-                JsonObject.AddPair(TJSONPair.Create('PERMISSOES_ITENS'      ,TJSONString.Create(DataSetPermissoes.FindField('PERMISSOES_ITENS').AsString)));
-                JsonArray.AddElement(JsonObject);
-                DataSetPermissoes.Next;
+                Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(False)));
+                Result.AddPair(TJSONPair.Create('message',TJSONString.Create('Usuário sem permissões')));
+              end
+            else
+              begin
+                DataSetPermissoes.First;
+                while not DataSetPermissoes.eof do
+                  begin
+                    JsonObject := TJSONObject.Create;
+                    JsonObject.AddPair(TJSONPair.Create('PERMISSOES_ID_EMPRESAS',TJSONNumber.Create(DataSetPermissoes.FindField('PERMISSOES_ID_EMPRESAS').AsInteger)));
+                    JsonObject.AddPair(TJSONPair.Create('EMPRESAS_FANTASIA'     ,TJSONString.Create(DataSetPermissoes.FindField('EMPRESAS_FANTASIA').AsString)));
+                    JsonObject.AddPair(TJSONPair.Create('PERMISSOES_ITENS'      ,TJSONString.Create(DataSetPermissoes.FindField('PERMISSOES_ITENS').AsString)));
+                    JsonArray.AddElement(JsonObject);
+                    DataSetPermissoes.Next;
+                  end;
+                DataSetLogs := ConexoesControl.Abre_tabelas('select * from LOGS where LOGS_ID > 0');
+                try
+                  DataSetLogs.Append;
+                  DataSetLogs.FindField('LOGS_ID').AsInteger          := ConexoesControl.Ultimo_ID('LOGS','T');
+                  DataSetLogs.FindField('LOGS_STATUS').AsString       := 'T';
+                  DataSetLogs.FindField('LOGS_IP').AsString           := IpAcesso;
+                  DataSetLogs.FindField('LOGS_ID_USUARIOS').AsInteger := DataSetLogin.FindField('LOGIN_ID').AsInteger;
+                  DataSetLogs.FindField('LOGS_DATA').AsDateTime       := Date;
+                  DataSetLogs.FindField('LOGS_HORA').AsString         := TimeToStr(Time);
+                  DataSetLogs.FindField('LOGS_DATALOGOUT').AsDateTime := StrToDate('30/12/1899');
+                  DataSetLogs.FindField('LOGS_HORALOGOUT').AsString   := '';
+                  DataSetLogs.Post;
+                  Result.AddPair(TJSONPair.Create('LOGIN_ID_LOGS' ,TJSONNumber.Create( DataSetLogs.FindField('LOGS_ID').AsInteger)));
+                  Result.AddPair(TJSONPair.Create('LOGIN_EMPRESAS',JsonArray));
+                finally
+                  FreeAndNil(DataSetLogs);
+                end;
               end;
           finally
              FreeAndNil(DataSetPermissoes);
-          end;
-          DataSetLogs := ConexoesControl.Abre_tabelas('select * from LOGS where LOGS_ID > 0');
-          try
-            DataSetLogs.Append;
-            DataSetLogs.FindField('LOGS_ID').AsInteger          := ConexoesControl.Ultimo_ID('LOGS','T');
-            DataSetLogs.FindField('LOGS_STATUS').AsString       := 'T';
-            DataSetLogs.FindField('LOGS_IP').AsString           := IpAcesso;
-            DataSetLogs.FindField('LOGS_ID_USUARIOS').AsInteger := DataSetLogin.FindField('LOGIN_ID').AsInteger;
-            DataSetLogs.FindField('LOGS_DATA').AsDateTime       := Date;
-            DataSetLogs.FindField('LOGS_HORA').AsString         := TimeToStr(Time);
-            DataSetLogs.FindField('LOGS_DATALOGOUT').AsDateTime := StrToDate('30/12/1899');
-            DataSetLogs.FindField('LOGS_HORALOGOUT').AsString   := '';
-            DataSetLogs.Post;
-            Result.AddPair(TJSONPair.Create('LOGIN_ID_LOGS' ,TJSONNumber.Create( DataSetLogs.FindField('LOGS_ID').AsInteger)));
-            Result.AddPair(TJSONPair.Create('LOGIN_EMPRESAS',JsonArray));
-          finally
-            FreeAndNil(DataSetLogs);
           end;
         end
       else
@@ -214,13 +220,13 @@ end;
 
 class function TUtilsVO.GetValidar(Parametros:String): TJSONObject;
 var
-  ACBrValidador   : TACBrValidador;
   StrParametros   : TStringList;
   ConexoesControl : TConexoesController;
   DataSetRetorno  : TDataSet;
+  Valido          : Boolean;
 begin
+
   Result          := TJSONObject.Create;
-  ACBrValidador   := TACBrValidador.Create(nil);
 
   if StrContains(Parametros,'|') then
     StrParametros := Explode(Parametros,'|')
@@ -232,12 +238,13 @@ begin
       StrParametros.Add('F');
       StrParametros.Add('');
     end;
-
   if StrParametros[0] = 'CPFCNPJ' then
     begin
-      ACBrValidador.TipoDocto := TACBrValTipoDocto(iif(StrLen(StrParametros[1])=11,0,1));
-      ACBrValidador.Documento := StrParametros[1];
-      if ACBrValidador.Validar then
+      if StrLen(StrParametros[1])=11 then
+        Valido := iif(ValidaCPF(StrParametros[1]),True,False)
+      else
+        Valido := iif(ValidaCNPJ(StrParametros[1]),True,False);
+      if Valido then
         begin
           if StrParametros[2] = 'T' then
             begin
@@ -254,7 +261,7 @@ begin
                 else
                   begin
                     Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(True)));
-                    Result.AddPair(TJSONPair.Create('message',TJSONString.Create('Cpf/Cnpj válido')));
+                    Result.AddPair(TJSONPair.Create('message',TJSONString.Create(iif(StrLen(StrParametros[1])=11,'Cpf','Cnpj') + ' válido')));
                   end;
               finally
                 FreeAndNil(DataSetRetorno);
@@ -264,34 +271,16 @@ begin
           else
             begin
               Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(True)));
-              Result.AddPair(TJSONPair.Create('message',TJSONString.Create('Cpf/Cnpj válido')));
+              Result.AddPair(TJSONPair.Create('message',TJSONString.Create(iif(StrLen(StrParametros[1])=11,'Cpf','Cnpj') + ' válido')));
             end;
         end
       else
         begin
-          Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(False)));
-          Result.AddPair(TJSONPair.Create('message',TJSONString.Create('Cpf/Cnpj inválido')));
+          Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(false)));
+          Result.AddPair(TJSONPair.Create('message',TJSONString.Create(iif(StrLen(StrParametros[1])=11,'Cpf','Cnpj') + ' inválido')));
         end;
-    end
-  else
-    if StrParametros[0] = 'INSCRICAO' then
-      begin
-        ACBrValidador.TipoDocto   := TACBrValTipoDocto(3);
-        ACBrValidador.Documento   := RemoverEspeciais(StrParametros[1]);
-        ACBrValidador.Complemento := StrParametros[2];
-        if ACBrValidador.Validar then
-          begin
-            Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(True)));
-            Result.AddPair(TJSONPair.Create('message',TJSONString.Create('Inscrição válida')));
-          end
-        else
-          begin
-            Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(False)));
-            Result.AddPair(TJSONPair.Create('message',TJSONString.Create('Inscrição inválida')));
-          end;
-      end;
+    end;
 
-  FreeAndNil(ACBrValidador);
   FreeAndNil(StrParametros);
 
 end;
@@ -300,24 +289,284 @@ class function TUtilsVO.GetGeraPDF(Parametros:String): TJSONObject;
 var
   ConexoesControl : TConexoesController;
   DataSetGenerico : TDataSet;
-  ArquivoPDF      : String;
-  CaminhoPDF      : String;
-begin
+  Itens           : Integer;
+  Rodape          : String;
+  Margins         : TJSONArray;
+  Margin          : TJSONArray;
+  Widths          : TJSONArray;
+  Content         : TJSONArray;
+  Border1         : TJSONArray;
+  Border2         : TJSONArray;
+  Border3         : TJSONArray;
+  Body            : TJSONArray;
+  BodyItens       : TJSONArray;
+  Columns         : TJSONArray;
 
-  ArquivoPDF      := RemoverEspeciais(GeraGuid);
-  CaminhoPDF      := Configurar('PATHPDF=');
+  TableExample    : TJSONObject;
+  TableHeader     : TJSONObject;
+  Style           : TJSONObject;
+  Table           : TJSONObject;
+  ItemPrinter     : TJSONObject;
+  Styles          : TJSONObject;
+begin
 
   ConexoesControl := TConexoesController.Create;
 
   DataSetGenerico := ConexoesControl.Abre_Tabelas('select * from USUARIOS ' +
                                                   'join CIDADES on CIDADES_ID = USUARIOS_ID_CIDADES ' +
-                                                  'where USUARIOS_ID < 100 order by USUARIOS_ID');
+                                                  'where USUARIOS_ID < 400 order by USUARIOS_ID');
+
+  Result          := TJSONObject.Create;
+  Result.AddPair(TJSONPair.Create('pageOrientation',TJSONString.Create('landscape')));
+  Result.AddPair(TJSONPair.Create('pageSize',TJSONString.Create('A4')));
+
+  Margins         := TJSONArray.Create;
+  Margins.AddElement(TJSONNumber.Create(40));
+  Margins.AddElement(TJSONNumber.Create(40));
+  Margins.AddElement(TJSONNumber.Create(40));
+  Margins.AddElement(TJSONNumber.Create(35));
+  Result.AddPair(TJSONPair.Create('pageMargins',Margins));
+
+  Content         := TJSONArray.Create;
+  columns         := TJSONArray.Create;
+
+  for Itens := 1  to 7 do
+    columns.AddElement(TJSONObject.Create());
+
+  Content.AddElement(TJSONObject.Create(TJSONPair.Create('columns',columns)));
+
+  Widths          := TJSONArray.Create;
+  Widths.AddElement(TJSONNumber.Create(30));   // Codigo
+  Widths.AddElement(TJSONNumber.Create(200));  // Nome
+  Widths.AddElement(TJSONNumber.Create(40));   // Cep
+  Widths.AddElement(TJSONNumber.Create(200));  // Endereco
+  Widths.AddElement(TJSONNumber.Create(40));   // Numero
+  Widths.AddElement(TJSONNumber.Create(160));  // Cidade
+  Widths.AddElement(TJSONNumber.Create(30));   // Estado
+
+  Style           := TJSONObject.Create;
+  Style.AddPair('style',TJSONString.Create('tableExample'));
+
+  Table           := TJSONObject.Create;
+  Table.AddPair('headerRows',TJSONNumber.Create(2));
+  Table.AddPair('widths',Widths);
+
+  Body            := TJSONArray.Create;
 
 
+  border1         := TJSONArray.Create;
+  border1.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border1.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border1.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border1.AddElement(TJSONObject(TJSONBool.Create(False)));
 
-  Result           := TJSONObject.Create;
-  Result.AddPair(TJSONPair.Create('status',TJSONBool.Create(true)));
-  Result.AddPair(TJSONPair.Create('arquivo',TJSONString.Create(ArquivoPDF + '.PDF')));
+  border2         := TJSONArray.Create;
+  border2.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border2.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border2.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border2.AddElement(TJSONObject(TJSONBool.Create(False)));
+
+  border3         := TJSONArray.Create;
+  border3.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border3.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border3.AddElement(TJSONObject(TJSONBool.Create(False)));
+  border3.AddElement(TJSONObject(TJSONBool.Create(False)));
+
+
+// Titulo
+  BodyItens       := TJSONArray.Create;
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('EMPRESA B'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('fontSize' ,TJSONNumber.Create(15));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+  ItemPrinter.AddPair('colSpan',TJSONNumber.Create(2));
+  ItemPrinter.AddPair('border',border1);
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('RELAÇÃO DE USUÁRIOS'+#32));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('fontSize' ,TJSONNumber.Create(20));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('center'));
+  ItemPrinter.AddPair('colSpan',TJSONNumber.Create(3));
+  ItemPrinter.AddPair('border',border2);
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create(DateToStr(Date) + ' ' + StrLeft(TimeToStr(Time),5)));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('fontSize' ,TJSONNumber.Create(15));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('right'));
+  ItemPrinter.AddPair('colSpan'  ,TJSONNumber.Create(2));
+  ItemPrinter.AddPair('border',border3);
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  BodyItens.AddElement(ItemPrinter);
+
+  Body.AddElement(BodyItens);
+
+// Cabeçalho
+  BodyItens       := TJSONArray.Create;
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('Código'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('right'));
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('Nome'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('Cep'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('Endereço'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('Número'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('Cidade'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+  BodyItens.AddElement(ItemPrinter);
+
+  ItemPrinter := TJSONObject.Create;
+  ItemPrinter.AddPair('text'     ,TJSONString.Create('Estado'));
+  ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+  ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+  ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+  BodyItens.AddElement(ItemPrinter);
+  Body.AddElement(BodyItens);
+
+// Itens
+
+  DataSetGenerico.First;
+  while not DataSetGenerico.eof  do
+    begin
+      BodyItens   := TJSONArray.Create;
+
+      ItemPrinter := TJSONObject.Create;
+      ItemPrinter.AddPair('text'     ,TJSONNumber.Create(DataSetGenerico.FindField('USUARIOS_ID').AsInteger));
+      ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+      ItemPrinter.AddPair('fillColor',TJSONString.Create(iif((DataSetGenerico.recno mod 2)=0,'#dedede','#ffffff')));
+      ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+      ItemPrinter.AddPair('alignment',TJSONString.Create('right'));
+      BodyItens.AddElement(ItemPrinter);
+
+      ItemPrinter := TJSONObject.Create;
+      ItemPrinter.AddPair('text'     ,TJSONString.Create(DataSetGenerico.FindField('USUARIOS_NOME').AsString));
+      ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+      ItemPrinter.AddPair('fillColor',TJSONString.Create(iif((DataSetGenerico.recno mod 2)=0,'#dedede','#ffffff')));
+      ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+      ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+      BodyItens.AddElement(ItemPrinter);
+
+      ItemPrinter := TJSONObject.Create;
+      ItemPrinter.AddPair('text'     ,TJSONString.Create(DataSetGenerico.FindField('USUARIOS_CEP').AsString));
+      ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+      ItemPrinter.AddPair('fillColor',TJSONString.Create(iif((DataSetGenerico.recno mod 2)=0,'#dedede','#ffffff')));
+      ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+      ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+      BodyItens.AddElement(ItemPrinter);
+
+      ItemPrinter := TJSONObject.Create;
+      ItemPrinter.AddPair('text'     ,TJSONString.Create(DataSetGenerico.FindField('USUARIOS_ENDERECO').AsString));
+      ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+      ItemPrinter.AddPair('fillColor',TJSONString.Create(iif((DataSetGenerico.recno mod 2)=0,'#dedede','#ffffff')));
+      ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+      ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+      BodyItens.AddElement(ItemPrinter);
+
+      ItemPrinter := TJSONObject.Create;
+      ItemPrinter.AddPair('text'     ,TJSONString.Create(DataSetGenerico.FindField('USUARIOS_NUMERO').AsString));
+      ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+      ItemPrinter.AddPair('fillColor',TJSONString.Create(iif((DataSetGenerico.recno mod 2)=0,'#dedede','#ffffff')));
+      ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+      ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+      BodyItens.AddElement(ItemPrinter);
+
+      ItemPrinter := TJSONObject.Create;
+      ItemPrinter.AddPair('text'     ,TJSONString.Create(DataSetGenerico.FindField('CIDADES_NOME').AsString));
+      ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+      ItemPrinter.AddPair('fillColor',TJSONString.Create(iif((DataSetGenerico.recno mod 2)=0,'#dedede','#ffffff')));
+      ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+      ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+      BodyItens.AddElement(ItemPrinter);
+
+      ItemPrinter := TJSONObject.Create;
+      ItemPrinter.AddPair('text'     ,TJSONString.Create(DataSetGenerico.FindField('CIDADES_ESTADO').AsString));
+      ItemPrinter.AddPair('style'    ,TJSONString.Create('tableHeader'));
+      ItemPrinter.AddPair('fillColor',TJSONString.Create(iif((DataSetGenerico.recno mod 2)=0,'#dedede','#ffffff')));
+      ItemPrinter.AddPair('bold'     ,TJSONBool.Create(false));
+      ItemPrinter.AddPair('alignment',TJSONString.Create('left'));
+      BodyItens.AddElement(ItemPrinter);
+
+      Body.AddElement(BodyItens);
+
+      DataSetGenerico.Next;
+    end;
+
+  Table.AddPair('body',Body);
+
+  Style.AddPair('table',Table);
+
+  Content.AddElement(Style);
+
+  Result.AddPair(TJSONPair.Create('content',Content));
+
+  Styles          := TJSONObject.Create;
+
+  Margin          := TJSONArray.Create;
+  Margin.AddElement(TJSONNumber.Create(0));
+  Margin.AddElement(TJSONNumber.Create(0));
+  Margin.AddElement(TJSONNumber.Create(0));
+  Margin.AddElement(TJSONNumber.Create(5));
+
+  TableExample    := TJSONObject.Create;
+  TableExample.AddPair('fontSize',TJSONNumber.Create(8));
+  TableExample.AddPair('margin',Margin);
+
+  TableHeader     := TJSONObject.Create;
+  TableHeader.AddPair('fontSize',TJSONNumber.Create(8));
+  TableHeader.AddPair('color',TJSONString.Create('black'));
+
+  Styles.AddPair('tableExample',TableExample);
+  Styles.AddPair('tableHeader',TableHeader);
+
+  Result.AddPair(TJSONPair.Create('styles',Styles));
 
 end;
 

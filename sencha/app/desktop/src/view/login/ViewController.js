@@ -179,7 +179,7 @@ Ext.define('AppSamos.view.login.ViewController', {
     },
 
     onSairClick: function(btn, e){
-        Ext.Msg.confirm('Confirmação', 'Quer realmente sair ?', btn => {
+        Utils.Msg.confirm('Deseja realmente sair ?', btn => {
             if(btn == 'yes') {
                 location.href = 'https://jw.org';
             }
