@@ -27,19 +27,19 @@ type
 
 implementation
 
-uses ConexoesController, FuncoesController, PortadoresVO;
+uses ConexoesFactory, FuncoesController, PortadoresVO;
 
 class function TUtilsVO.GetLogin(Usuario,Senha,IpAcesso:String): TJSONObject;
 var
   DataSetLogin      : TDataSet;
   DataSetLogs       : TDataSet;
   DataSetPermissoes : TDataSet;
-  ConexoesControl   : TConexoesController;
+  ConexoesControl   : TConexoesFactory;
   JsonArray         : TJSONArray;
   JsonObject        : TJsonObject;
 begin
   Result            := TJSONObject.Create;
-  ConexoesControl   := TConexoesController.Create;
+  ConexoesControl   := TConexoesFactory.Create;
   try
     DataSetLogin    := ConexoesControl.Abre_tabelas('select USUARIOS_ID           as LOGIN_ID,          ' +
                                                     '       USUARIOS_VALIDADE     as LOGIN_VALIDADE,    ' +
@@ -127,10 +127,10 @@ end;
 class function TUtilsVO.GetLogout(Parametros:String): TJSONObject;
 var
   DataSetLogs     : TDataSet;
-  ConexoesControl : TConexoesController;
+  ConexoesControl : TConexoesFactory;
 begin
   Result          := TJSONObject.Create;
-  ConexoesControl := TConexoesController.Create;
+  ConexoesControl := TConexoesFactory.Create;
   try
     DataSetLogs   := ConexoesControl.Abre_tabelas('select * from LOGS where LOGS_ID = ' + Parametros);
     try
@@ -164,11 +164,11 @@ var
   JSonValue       : TJSonValue;
   function Acha_Cidades(varIBGE,varNOME:String):Integer;
   var
-    ConexoesControl : TConexoesController;
+    ConexoesControl : TConexoesFactory;
     DataSetCidades  : TDataSet;
   begin
     try
-      ConexoesControl   := TConexoesController.Create;
+      ConexoesControl   := TConexoesFactory.Create;
       DataSetCidades    := ConexoesControl.Abre_tabelas('select * from CIDADES where CIDADES_IBGE = ' + QuotedStr(varIBGE) + ' and ' +
                                                         'CIDADES_NOME like ' + QuotedStr('%' + varNOME + '%') + ' ' +
                                                         'order by CIDADES_IBGE');
@@ -221,7 +221,7 @@ end;
 class function TUtilsVO.GetValidar(Parametros:String): TJSONObject;
 var
   StrParametros   : TStringList;
-  ConexoesControl : TConexoesController;
+  ConexoesControl : TConexoesFactory;
   DataSetRetorno  : TDataSet;
   Valido          : Boolean;
 begin
@@ -249,7 +249,7 @@ begin
           if StrParametros[2] = 'T' then
             begin
               try
-                ConexoesControl   := TConexoesController.Create;
+                ConexoesControl   := TConexoesFactory.Create;
                 DataSetRetorno    := ConexoesControl.Abre_tabelas('select * from '+ StrParametros[3] + ' ' +
                                                                   'where ' + StrParametros[3] + '_CPFCNPJ = ' + QuotedStr(StrParametros[1]) + ' ' +
                                                                   'order by ' + StrParametros[3] + '_CPFCNPJ');
@@ -287,7 +287,7 @@ end;
 
 class function TUtilsVO.GetGeraPDF(Parametros:String): TJSONObject;
 var
-  ConexoesControl : TConexoesController;
+  ConexoesControl : TConexoesFactory;
   DataSetGenerico : TDataSet;
   Itens           : Integer;
   Rodape          : String;
@@ -310,7 +310,7 @@ var
   Styles          : TJSONObject;
 begin
 
-  ConexoesControl := TConexoesController.Create;
+  ConexoesControl := TConexoesFactory.Create;
 
   DataSetGenerico := ConexoesControl.Abre_Tabelas('select * from USUARIOS ' +
                                                   'join CIDADES on CIDADES_ID = USUARIOS_ID_CIDADES ' +

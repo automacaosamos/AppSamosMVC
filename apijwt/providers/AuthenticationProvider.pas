@@ -23,11 +23,11 @@ type
 
 implementation
 
-uses FuncoesController, ConexoesController;
+uses FuncoesController, ConexoesFactory;
 
 procedure TAuthenticationProvider.OnAuthentication(const AContext: TWebContext;const AUserName, APassword: string; AUserRoles: TList<string>; var AIsValid: Boolean; const ASessionData: TDictionary<string, string>);
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetUsuarios  : TDataSet;
   LGUID            : String;
   LJSON            : String;
@@ -65,7 +65,7 @@ var
   end;
 begin
 
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
 
   DataSetUsuarios  := ConexoesControl.Abre_Tabelas('select * from USUARIOS ' +
                                                    'where USUARIOS_LOGIN = ' + QuotedStr(UpperCase(AUserName)) + ' and ' +

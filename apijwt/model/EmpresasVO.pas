@@ -105,7 +105,7 @@ type
 
 implementation
 
-uses ConexoesController, FuncoesController;
+uses ConexoesFactory, FuncoesController;
 
 destructor TEmpresasVO.Destroy;
 var
@@ -194,7 +194,7 @@ begin
 end;
 class function TEmpresasVO.GetAll(Parametros,Start,Limit:String): TEmpresasVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetEmpresas  : TDataSet;
   EmpresasVO       : TEmpresasVO;
   EmpresasBasicaVO : TEmpresasBasicaVO;
@@ -205,7 +205,7 @@ var
   StrParametros    : TStringList;
 begin
 
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
 
   if StrContains(Parametros,'|') then
     StrParametros := Explode(Parametros,'|')
@@ -311,12 +311,12 @@ end;
 
 class function TEmpresasVO.GetByID(Parametros: integer): TEmpresasVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   EmpresasVO       : TEmpresasVO;
   EmpresasBasicaVO : TEmpresasBasicaVO;
   DataSetEmpresas  : TDataSet;
 begin
-  ConexoesControl    := TConexoesController.Create;
+  ConexoesControl    := TConexoesFactory.Create;
   DataSetEmpresas    := ConexoesControl.Abre_tabelas('select * from EMPRESAS where EMPRESAS_ID = ' + valor_str(Parametros));
   EmpresasVO         := TEmpresasVO.Create;
   EmpresasVO.results := TObjectList<TEmpresasBasicaVO>.Create;
@@ -338,10 +338,10 @@ end;
 
 class function TEmpresasVO.CreateRecord(EmpresasBasicaVO: TEmpresasBasicaVO): TEmpresasVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetEmpresas  : TDataSet;
 begin
-  ConexoesControl := TConexoesController.Create;
+  ConexoesControl := TConexoesFactory.Create;
   DataSetEmpresas := ConexoesControl.Abre_tabelas('select * from EMPRESAS where EMPRESAS_ID = 0 ');
   Result          := TEmpresasVO.Create;
   Result.results  := TObjectList<TEmpresasBasicaVO>.Create;
@@ -365,10 +365,10 @@ end;
 
 class function TEmpresasVO.UpdateRecord(Parametros:Integer;EmpresasBasicaVO: TEmpresasBasicaVO): TEmpresasVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetEmpresas  : TDataSet;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   DataSetEmpresas  := ConexoesControl.Abre_tabelas('select * from EMPRESAS where EMPRESAS_ID = ' + valor_str(Parametros));
   Result           := TEmpresasVO.Create;
   Result.results := TObjectList<TEmpresasBasicaVO>.Create;
@@ -394,9 +394,9 @@ end;
 
 class function TEmpresasVO.DeleteRecord(Parametros:Integer): TEmpresasVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   Result           := TEmpresasVO.Create;
   Result.results   := TObjectList<TEmpresasBasicaVO>.Create;
   Result.Total     := 0;

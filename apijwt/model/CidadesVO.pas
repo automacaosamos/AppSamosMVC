@@ -41,7 +41,7 @@ type
 
 implementation
 
-uses ConexoesController, FuncoesController;
+uses ConexoesFactory, FuncoesController;
 
 destructor TCidadesVO.Destroy;
 var
@@ -71,7 +71,7 @@ begin
 end;
 class function TCidadesVO.GetAll(Parametros,Start,Limit:String): TCidadesVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetCidades    : TDataSet;
   CidadesVO         : TCidadesVO;
   CidadesBasicaVO   : TCidadesBasicaVO;
@@ -79,11 +79,10 @@ var
   SQLWhere         : String;
   SQLOrder         : String;
   Registros        : Integer;
-  Itens            : Integer;
   StrParametros    : TStringList;
 begin
 
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
 
   if StrContains(Parametros,'|') then
     StrParametros := Explode(Parametros,'|')
@@ -186,12 +185,12 @@ end;
 
 class function TCidadesVO.GetByID(Parametros: integer): TCidadesVO;
 var
-  ConexoesControl    : TConexoesController;
+  ConexoesControl    : TConexoesFactory;
   CidadesVO       : TCidadesVO;
   CidadesBasicaVO : TCidadesBasicaVO;
   DataSetCidades  : TDataSet;
 begin
-  ConexoesControl      := TConexoesController.Create;
+  ConexoesControl      := TConexoesFactory.Create;
   DataSetCidades      := ConexoesControl.Abre_tabelas('select * from CIDADES where CIDADES_ID = ' + valor_str(Parametros));
   CidadesVO           := TCidadesVO.Create;
   CidadesVO.results := TObjectList<TCidadesBasicaVO>.Create;
@@ -213,10 +212,10 @@ end;
 
 class function TCidadesVO.CreateRecord(CidadesBasicaVO: TCidadesBasicaVO): TCidadesVO;
 var
-  ConexoesControl   : TConexoesController;
+  ConexoesControl   : TConexoesFactory;
   DataSetCidades : TDataSet;
 begin
-  ConexoesControl   := TConexoesController.Create;
+  ConexoesControl   := TConexoesFactory.Create;
   DataSetCidades := ConexoesControl.Abre_tabelas('select * from CIDADES where CIDADES_ID = 0 ');
   Result            := TCidadesVO.Create;
   Result.results    := TObjectList<TCidadesBasicaVO>.Create;
@@ -240,10 +239,10 @@ end;
 
 class function TCidadesVO.UpdateRecord(Parametros:Integer;CidadesBasicaVO: TCidadesBasicaVO): TCidadesVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetCidades  : TDataSet;
 begin
-  ConexoesControl    := TConexoesController.Create;
+  ConexoesControl    := TConexoesFactory.Create;
   DataSetCidades  := ConexoesControl.Abre_tabelas('select * from CIDADES where CIDADES_ID = ' + valor_str(Parametros));
   Result             := TCidadesVO.Create;
   Result.results     := TObjectList<TCidadesBasicaVO>.Create;
@@ -269,9 +268,9 @@ end;
 
 class function TCidadesVO.DeleteRecord(Parametros:Integer): TCidadesVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   Result           := TCidadesVO.Create;
   Result.results   := TObjectList<TCidadesBasicaVO>.Create;
   Result.Total     := 0;

@@ -1,7 +1,6 @@
 HOSTNAME=127.0.0.1
-DATANAME=C:\AppSamosMVC\dados\samosdb.fdb
+DATANAME=c:\AppSamosMVC\dados\apidmvc.fdb
 USERNAME=SYSDBA
 PASSWORD=masterkey
 PORTNAME=3050
 PORTHTTP=8050
-PATHPDF=C:\AppSamosMVC\server\public\

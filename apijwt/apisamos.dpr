@@ -16,7 +16,6 @@ uses
   AuthenticationProvider in 'providers\AuthenticationProvider.pas',
   BancosController in 'controllers\BancosController.pas',
   CidadesController in 'controllers\CidadesController.pas',
-  ConexoesController in 'controllers\ConexoesController.pas',
   EmpresasController in 'controllers\EmpresasController.pas',
   FuncoesController in 'controllers\FuncoesController.pas',
   PortadoresController in 'controllers\PortadoresController.pas',
@@ -27,7 +26,8 @@ uses
   EmpresasVO in 'model\EmpresasVO.pas',
   PortadoresVO in 'model\PortadoresVO.pas',
   UsuariosVO in 'model\UsuariosVO.pas',
-  UtilsVO in 'model\UtilsVO.pas';
+  UtilsVO in 'model\UtilsVO.pas',
+  ConexoesFactory in 'factory\ConexoesFactory.pas';
 
 {$R *.res}
 

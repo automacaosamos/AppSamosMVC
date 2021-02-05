@@ -37,7 +37,7 @@ type
 
 implementation
 
-uses ConexoesController, FuncoesController;
+uses ConexoesFactory, FuncoesController;
 
 destructor TBancosVO.Destroy;
 var
@@ -62,7 +62,7 @@ begin
 end;
 class function TBancosVO.GetAll(Parametros,Start,Limit:String): TBancosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetBancos    : TDataSet;
   BancosVO         : TBancosVO;
   BancosBasicaVO   : TBancosBasicaVO;
@@ -74,7 +74,7 @@ var
   StrParametros    : TStringList;
 begin
 
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
 
   if StrContains(Parametros,'|') then
     StrParametros := Explode(Parametros,'|')
@@ -177,12 +177,12 @@ end;
 
 class function TBancosVO.GetByID(Parametros: integer): TBancosVO;
 var
-  ConexoesControl    : TConexoesController;
+  ConexoesControl    : TConexoesFactory;
   BancosVO       : TBancosVO;
   BancosBasicaVO : TBancosBasicaVO;
   DataSetBancos  : TDataSet;
 begin
-  ConexoesControl      := TConexoesController.Create;
+  ConexoesControl      := TConexoesFactory.Create;
   DataSetBancos      := ConexoesControl.Abre_tabelas('select * from BANCOS where BANCOS_ID = ' + valor_str(Parametros));
   BancosVO           := TBancosVO.Create;
   BancosVO.results := TObjectList<TBancosBasicaVO>.Create;
@@ -204,10 +204,10 @@ end;
 
 class function TBancosVO.CreateRecord(BancosBasicaVO: TBancosBasicaVO): TBancosVO;
 var
-  ConexoesControl   : TConexoesController;
+  ConexoesControl   : TConexoesFactory;
   DataSetBancos : TDataSet;
 begin
-  ConexoesControl   := TConexoesController.Create;
+  ConexoesControl   := TConexoesFactory.Create;
   DataSetBancos := ConexoesControl.Abre_tabelas('select * from BANCOS where BANCOS_ID = 0 ');
   Result            := TBancosVO.Create;
   Result.results    := TObjectList<TBancosBasicaVO>.Create;
@@ -231,10 +231,10 @@ end;
 
 class function TBancosVO.UpdateRecord(Parametros:Integer;BancosBasicaVO: TBancosBasicaVO): TBancosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetBancos  : TDataSet;
 begin
-  ConexoesControl    := TConexoesController.Create;
+  ConexoesControl    := TConexoesFactory.Create;
   DataSetBancos  := ConexoesControl.Abre_tabelas('select * from BANCOS where BANCOS_ID = ' + valor_str(Parametros));
   Result             := TBancosVO.Create;
   Result.results     := TObjectList<TBancosBasicaVO>.Create;
@@ -260,9 +260,9 @@ end;
 
 class function TBancosVO.DeleteRecord(Parametros:Integer): TBancosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   Result           := TBancosVO.Create;
   Result.results   := TObjectList<TBancosBasicaVO>.Create;
   Result.Total     := 0;

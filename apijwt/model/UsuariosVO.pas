@@ -89,7 +89,7 @@ type
 
 implementation
 
-uses ConexoesController, FuncoesController;
+uses ConexoesFactory, FuncoesController;
 
 destructor TUsuariosVO.Destroy;
 var
@@ -163,7 +163,7 @@ end;
 
 class function TUsuariosVO.GetAll(Parametros,Start,Limit:String): TUsuariosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetUsuarios  : TDataSet;
   UsuariosVO       : TUsuariosVO;
   UsuariosBasicaVO : TUsuariosBasicaVO;
@@ -171,11 +171,10 @@ var
   SQLWhere         : String;
   SQLOrder         : String;
   Registros        : Integer;
-  Itens            : Integer;
   StrParametros    : TStringList;
 begin
 
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
 
   if StrContains(Parametros,'|') then
     StrParametros := Explode(Parametros,'|')
@@ -291,12 +290,12 @@ end;
 
 class function TUsuariosVO.GetByID(Parametros: integer): TUsuariosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   UsuariosVO       : TUsuariosVO;
   UsuariosBasicaVO : TUsuariosBasicaVO;
   DataSetUsuarios  : TDataSet;
 begin
-  ConexoesControl    := TConexoesController.Create;
+  ConexoesControl    := TConexoesFactory.Create;
   DataSetUsuarios    := ConexoesControl.Abre_tabelas('select * from USUARIOS where USUARIOS_ID = ' + valor_str(Parametros));
   UsuariosVO         := TUsuariosVO.Create;
   UsuariosVO.results := TObjectList<TUsuariosBasicaVO>.Create;
@@ -318,10 +317,10 @@ end;
 
 class function TUsuariosVO.CreateRecord(UsuariosBasicaVO: TUsuariosBasicaVO): TUsuariosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetUsuarios  : TDataSet;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   DataSetUsuarios  := ConexoesControl.Abre_tabelas('select * from USUARIOS where USUARIOS_ID = 0 ');
   Result           := TUsuariosVO.Create;
   Result.results   := TObjectList<TUsuariosBasicaVO>.Create;
@@ -345,10 +344,10 @@ end;
 
 class function TUsuariosVO.UpdateRecord(Parametros:Integer;UsuariosBasicaVO: TUsuariosBasicaVO): TUsuariosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetUsuarios  : TDataSet;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   DataSetUsuarios  := ConexoesControl.Abre_tabelas('select * from USUARIOS where USUARIOS_ID = ' + valor_str(Parametros));
   Result           := TUsuariosVO.Create;
   Result.results   := TObjectList<TUsuariosBasicaVO>.Create;
@@ -374,9 +373,9 @@ end;
 
 class function TUsuariosVO.DeleteRecord(Parametros:Integer): TUsuariosVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   Result           := TUsuariosVO.Create;
   Result.results   := TObjectList<TUsuariosBasicaVO>.Create;
   Result.Total     := 0;

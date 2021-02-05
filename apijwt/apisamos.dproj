@@ -122,7 +122,6 @@
         <DCCReference Include="providers\AuthenticationProvider.pas"/>
         <DCCReference Include="controllers\BancosController.pas"/>
         <DCCReference Include="controllers\CidadesController.pas"/>
-        <DCCReference Include="controllers\ConexoesController.pas"/>
         <DCCReference Include="controllers\EmpresasController.pas"/>
         <DCCReference Include="controllers\FuncoesController.pas"/>
         <DCCReference Include="controllers\PortadoresController.pas"/>
@@ -134,6 +133,7 @@
         <DCCReference Include="model\PortadoresVO.pas"/>
         <DCCReference Include="model\UsuariosVO.pas"/>
         <DCCReference Include="model\UtilsVO.pas"/>
+        <DCCReference Include="factory\ConexoesFactory.pas"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

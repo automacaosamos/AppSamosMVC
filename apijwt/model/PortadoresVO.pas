@@ -89,7 +89,7 @@ type
 
 implementation
 
-uses ConexoesController, FuncoesController;
+uses ConexoesFactory, FuncoesController;
 
 destructor TPortadoresVO.Destroy;
 var
@@ -162,7 +162,7 @@ begin
 end;
 class function TPortadoresVO.GetAll(Parametros,Start,Limit:String): TPortadoresVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetPortadores  : TDataSet;
   PortadoresVO       : TPortadoresVO;
   PortadoresBasicaVO : TPortadoresBasicaVO;
@@ -170,11 +170,10 @@ var
   SQLWhere         : String;
   SQLOrder         : String;
   Registros        : Integer;
-  Itens            : Integer;
   StrParametros    : TStringList;
 begin
 
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
 
   if StrContains(Parametros,'|') then
     StrParametros := Explode(Parametros,'|')
@@ -297,12 +296,12 @@ end;
 
 class function TPortadoresVO.GetByID(Parametros: integer): TPortadoresVO;
 var
-  ConexoesControl    : TConexoesController;
+  ConexoesControl    : TConexoesFactory;
   PortadoresVO       : TPortadoresVO;
   PortadoresBasicaVO : TPortadoresBasicaVO;
   DataSetPortadores  : TDataSet;
 begin
-  ConexoesControl      := TConexoesController.Create;
+  ConexoesControl      := TConexoesFactory.Create;
   DataSetPortadores    := ConexoesControl.Abre_tabelas('select * from PORTADORES where PORTADORES_ID = ' + valor_str(Parametros));
   PortadoresVO         := TPortadoresVO.Create;
   PortadoresVO.results := TObjectList<TPortadoresBasicaVO>.Create;
@@ -324,10 +323,10 @@ end;
 
 class function TPortadoresVO.CreateRecord(PortadoresBasicaVO: TPortadoresBasicaVO): TPortadoresVO;
 var
-  ConexoesControl   : TConexoesController;
+  ConexoesControl   : TConexoesFactory;
   DataSetPortadores : TDataSet;
 begin
-  ConexoesControl   := TConexoesController.Create;
+  ConexoesControl   := TConexoesFactory.Create;
   DataSetPortadores := ConexoesControl.Abre_tabelas('select * from PORTADORES where PORTADORES_ID = 0 ');
   Result            := TPortadoresVO.Create;
   Result.results    := TObjectList<TPortadoresBasicaVO>.Create;
@@ -351,10 +350,10 @@ end;
 
 class function TPortadoresVO.UpdateRecord(Parametros:Integer;PortadoresBasicaVO: TPortadoresBasicaVO): TPortadoresVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
   DataSetPortadores  : TDataSet;
 begin
-  ConexoesControl    := TConexoesController.Create;
+  ConexoesControl    := TConexoesFactory.Create;
   DataSetPortadores  := ConexoesControl.Abre_tabelas('select * from PORTADORES where PORTADORES_ID = ' + valor_str(Parametros));
   Result             := TPortadoresVO.Create;
   Result.results     := TObjectList<TPortadoresBasicaVO>.Create;
@@ -380,9 +379,9 @@ end;
 
 class function TPortadoresVO.DeleteRecord(Parametros:Integer): TPortadoresVO;
 var
-  ConexoesControl  : TConexoesController;
+  ConexoesControl  : TConexoesFactory;
 begin
-  ConexoesControl  := TConexoesController.Create;
+  ConexoesControl  := TConexoesFactory.Create;
   Result           := TPortadoresVO.Create;
   Result.results   := TObjectList<TPortadoresBasicaVO>.Create;
   Result.Total     := 0;
