@@ -304,7 +304,6 @@ Ext.define('AppSamos.view.empresas.form.ViewController', {
     onExcluirClick: function(btn, e) {
         const model = this.getViewModel().get('model');
         Utils.Msg.confirm('Quer realmente excluir ?', btn => {
-//        Ext.Msg.confirm('Confirmação', 'Quer realmente excluir ?', btn => {
             if(btn == 'yes') {
 
                 this.getView().setMasked({

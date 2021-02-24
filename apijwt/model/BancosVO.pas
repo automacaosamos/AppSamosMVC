@@ -70,7 +70,6 @@ var
   SQLWhere         : String;
   SQLOrder         : String;
   Registros        : Integer;
-  Itens            : Integer;
   StrParametros    : TStringList;
 begin
 

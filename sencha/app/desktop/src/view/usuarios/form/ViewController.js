@@ -192,8 +192,7 @@ Ext.define('AppSamos.view.usuarios.form.ViewController', {
 
         const cpfCnpjValido = await this.onValidaCpfCnpj();
         if(cpfCnpjValido == false) { return; }
-
-        Ext.Msg.confirm('Confirmação', 'Quer realmente gravar ?', btn => {
+        Utils.Msg.confirm('Quer realmente gravar ?', btn => {
             if(btn == 'yes') {
                 this.getView().setMasked({
                     xtype: 'loadmask',
@@ -273,8 +272,7 @@ Ext.define('AppSamos.view.usuarios.form.ViewController', {
 
     onExcluirClick: function(btn, e) {
         const model = this.getViewModel().get('model');
-
-        Ext.Msg.confirm('Confirmação', 'Quer realmente excluir ?', btn => {
+        Utils.Msg.confirm('Quer realmente excluir ?', btn => {
             if(btn == 'yes') {
 
                 this.getView().setMasked({

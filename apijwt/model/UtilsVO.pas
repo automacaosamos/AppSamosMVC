@@ -290,7 +290,6 @@ var
   ConexoesControl : TConexoesFactory;
   DataSetGenerico : TDataSet;
   Itens           : Integer;
-  Rodape          : String;
   Margins         : TJSONArray;
   Margin          : TJSONArray;
   Widths          : TJSONArray;

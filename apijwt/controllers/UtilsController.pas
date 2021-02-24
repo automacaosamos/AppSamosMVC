@@ -75,8 +75,6 @@ begin
 end;
 
 procedure TUtilsController.GetLogout(parametros:String);
-var
-  JSonValue : TJSonValue;
 begin
   Render(TUtilsVO.GetLogout(parametros));
 end;
